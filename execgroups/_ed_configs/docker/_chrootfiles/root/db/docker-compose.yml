@@ -1,0 +1,11 @@
+version: '2.0'
+services:
+    db:
+      restart: always
+      image: gear2000/mongodb:ready
+      logging:
+        driver: json-file
+        options:
+          max-size: 50m
+      env_file: .env
+      command: /run.sh
