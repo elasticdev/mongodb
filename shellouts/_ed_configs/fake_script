@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+def fake():
+
+    print 'This is a fake python sample script for contribution repository'
+
+fake()

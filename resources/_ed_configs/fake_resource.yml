@@ -1,0 +1,6 @@
+name: fake_security_group
+ports: 0-65535
+config_env: public
+protocol: tcp
+sgs: 
+    - fake_sg
