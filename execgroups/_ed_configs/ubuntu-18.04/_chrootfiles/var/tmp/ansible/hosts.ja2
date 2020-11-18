@@ -1,0 +1,4 @@
+[all:vars]
+
+[mongo]
+{{ MONGODB_HOST }} ansible_user={{ ANSIBLE_USER }} ansible_python_interpreter="/usr/bin/env python3"

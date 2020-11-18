@@ -1,0 +1,4 @@
+[all:vars]
+
+[mongo]
+13.69.191.159 ansible_user=lesha  ansible_python_interpreter="/usr/bin/env python3"
