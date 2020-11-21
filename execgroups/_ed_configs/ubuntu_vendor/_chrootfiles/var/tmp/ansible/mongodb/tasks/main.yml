@@ -29,6 +29,17 @@
         cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
       with_items: "{{ mongodb_packages }}"
 
+    - name: Install python3-pip
+      apt:
+        name: "python3-pip"
+    
+    - name: Install the latest pymongo package
+      pip: 
+        executable: pip3
+        name: pymongo
+        state: latest 
+        use_mirrors: no
+
     - name: copy mongodb replication keyfile
       copy:
         dest: "{{ mongodb_keyfile_path }}"
