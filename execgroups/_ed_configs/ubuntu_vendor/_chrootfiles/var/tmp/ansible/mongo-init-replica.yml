@@ -1,0 +1,10 @@
+---
+- name: Start Replicaset
+  hosts: 
+    - public_main
+  remote_user: "{{ os_user }}"
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  roles:
+    - replicaset

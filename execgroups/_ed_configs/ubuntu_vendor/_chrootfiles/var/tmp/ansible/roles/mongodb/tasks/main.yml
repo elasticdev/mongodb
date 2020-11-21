@@ -40,6 +40,18 @@
       #  name: pymongo
       #  state: latest 
       #  use_mirrors: no
+      #
+    - name: add mongodb directories
+      file:
+        state: directory
+        path: "{{ item }}"
+        owner: "{{ mongodb_user }}"
+        group: "{{ mongodb_group }}"
+        mode: 0755
+      with_items:
+        - "{{ mongodb_dbpath }}"
+        - "{{ mongodb_security_path }}"
+        - "{{ mongodb_logpath | dirname }}"
 
     - name: copy mongodb replication keyfile
       copy:
@@ -70,18 +82,6 @@
         content: "{{ mongodb_keyfile_content }}"
       notify: restart mongodb
       when: "{{ mongodb_keyfile_content is defined }}"
-
-    - name: add mongodb directories
-      file:
-        state: directory
-        path: "{{ item }}"
-        owner: "{{ mongodb_user }}"
-        group: "{{ mongodb_group }}"
-        mode: 0755
-      with_items:
-        - "{{ mongodb_dbpath }}"
-        - "{{ mongodb_security_path }}"
-        - "{{ mongodb_logpath | dirname }}"
 
     - name: ensure mongodb service is running and enabled on boot
       service:

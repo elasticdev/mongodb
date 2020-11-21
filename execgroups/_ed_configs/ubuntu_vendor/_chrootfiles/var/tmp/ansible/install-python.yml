@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: public
   remote_user: "{{ os_user }}"
   become: true
   gather_facts: false

@@ -1,5 +1,5 @@
 ---
 - name: install
-  hosts: all
+  hosts: public
   roles:
     - role: mongodb

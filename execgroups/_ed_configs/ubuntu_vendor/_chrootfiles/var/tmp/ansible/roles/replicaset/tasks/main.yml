@@ -1,0 +1,3 @@
+---
+- include: init_replicaset.yml
+- include: add_nodes_replicaset.yml

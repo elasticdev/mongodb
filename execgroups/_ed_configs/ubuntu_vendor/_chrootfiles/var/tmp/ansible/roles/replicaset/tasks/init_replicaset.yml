@@ -1,0 +1,9 @@
+---
+- name: Copy the initialization script to tmp
+  template:
+    src: replicaset_init.j2
+    dest: /tmp/replicaset_init.js
+
+- name: Execute the initialization script and add all replicants
+  shell: mongo localhost:{{ mongodb_port }}/admin /tmp/replicaset_init.js
+  ignore_errors: yes

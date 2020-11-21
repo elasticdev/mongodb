@@ -1,8 +1,8 @@
 ---
 - name: install
-  hosts: all
+  hosts: public
   roles:
     - role: mongodb
       mongodb_repl_set_name: rs0
-      # mongodb_keyfile: files/mongodb_keyfile
+      mongodb_keyfile: roles/replicaset/files/mongodb_keyfile
       # mongodb_repl_oplog_size: 51200

@@ -1,0 +1,4 @@
+{% for private_id in private_replicas %}
+  rs.add("{{ hostvars[private_id].inventory_hostname }}:{{ mongodb_port }}");
+  sleep(1000);
+{% endfor %}
