@@ -34,11 +34,12 @@
         name: "python3-pip"
     
     - name: Install the latest pymongo package
-      pip: 
-        executable: pip3
-        name: pymongo
-        state: latest 
-        use_mirrors: no
+      raw: pip3 install pymongo
+      #pip: 
+      #  executable: pip3
+      #  name: pymongo
+      #  state: latest 
+      #  use_mirrors: no
 
     - name: copy mongodb replication keyfile
       copy:
@@ -57,6 +58,7 @@
         group: "root"
         mode: 0755
         src: "{{ mongodb_servicefile_path }}"
+        #src: files/mongodb.service
       notify: restart mongodb
       when: "{{ mongodb_servicefile is defined }}"
 

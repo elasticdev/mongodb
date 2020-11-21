@@ -1,0 +1,5 @@
+os_user: ubuntu
+mongo_admin_user: admin
+mongo_admin_pass: admin135*
+mongo_databases:
+    - {name: 'mymongodb', port: 27101, cacheSizeGB: 1.0 }
