@@ -57,8 +57,7 @@
         owner: "root"
         group: "root"
         mode: 0755
-        src: "{{ mongodb_servicefile_path }}"
-        #src: files/mongodb.service
+        src: "{{ mongodb_servicefile }}"
       notify: restart mongodb
       when: "{{ mongodb_servicefile is defined }}"
 
