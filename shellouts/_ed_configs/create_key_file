@@ -1,0 +1,173 @@
+#!/usr/bin/env python
+#
+#This file is part of "jiffy".
+#
+#Project: jiffy: A product for building and managing infrastructure: 
+#cloud provider services, and servers and their configurations.
+#
+#Description: A product for building and managing infrastructure. 
+#This includes third party API calls for services such as virtual
+#cloud servers, load balancers, databases, and other. The product 
+#manages connectivity and appropriate communication among these 
+#aws.
+#
+#Copyright (C) Gary Leong - All Rights Reserved
+#Unauthorized copying of this file, via any medium is strictly prohibited
+#Proprietary and confidential
+#Written by Gary Leong  <gwleong@gmail.com, September 17,2015
+
+import os
+import sys
+
+from ed_helper_publisher.utilities import OnDiskTmpDir
+from ed_helper_publisher.loggerly import ElasticDevLogger
+from ed_helper_publisher.resource_manage import ResourceCmdHelper
+
+class Main(ResourceCmdHelper):
+
+    def __init__(self,**kwargs):
+
+        ResourceCmdHelper.__init__(self)
+        self.classname = 'OpenSSL'
+        self.logger = ElasticDevLogger(self.classname,logcategory="cloudprovider")
+        self.logger.debug("Instantiating %s" % self.classname)
+        self.country = kwargs.get("country","US")
+        self.country_state = kwargs.get("country_state","California")
+        self.city = kwargs.get("city","SanFrancisco")
+        self.cert_cn = kwargs.get("cert_cn","www.selfsigned.com")
+        self.cert_length = kwargs.get("cert_length","1024")
+        self.cert_bits = kwargs.get("cert_bits","2048")
+        self.application = "mongodb"
+        self.provider = "openssl"
+        self.source_method = "shellout"
+        self.encrypt_fields = [ "contents" ]
+
+    def create_ssl(self):
+
+        tempdir = OnDiskTmpDir()
+
+        basedir = os.getcwd()
+
+        os.chdir(tempdir.get())
+        
+        cmd = 'openssl req -newkey rsa:{} -new -x509 -subj "/C={}/ST={}/L={}/O=Dis/CN={}" -days {} -nodes -out mongodb.crt -keyout mongodb.key'.format(self.cert_bits,
+                                                                                                                                                       self.country,
+                                                                                                                                                       self.country_state,
+                                                                                                                                                       self.city,
+                                                                                                                                                       self.cert_cn,
+                                                                                                                                                       self.cert_length)
+
+        self.execute(cmd)
+
+        cmd = 'bash -c \'cat mongodb.crt mongodb.key > mongodb.pem\''
+        self.execute(cmd)
+
+        cmd = 'cat mongodb.pem'
+        results = self.execute(cmd)
+        
+        os.chdir(basedir)
+        tempdir.delete()
+
+        resource = {"resource_type":"ssl_pem"}
+        resource["application"] = self.application
+        resource["provider"] = self.provider
+        resource["source_method"] = self.source_method
+        resource["encrypt_fields"] = self.encrypt_fields
+
+        resource['name'] = "{}.pem".format(self.inputargs["name"])
+        resource["country"] = self.country
+        resource["state"] = self.country_state
+        resource["city"] = self.city
+        resource["cn"] = self.cert_cn
+        resource["length"] = self.cert_length
+        resource['id'] = self.get_hash(resource)
+        resource["contents"] = results["output"]
+        resource['_id'] = resource['id']
+        resource["tags"] = [ "mongodb", "mongodb.pem", "pem", "ssl" ]
+
+        #with open("/tmp/mongodb.pem", 'w') as _file:
+        #    _file.write(results["output"])
+        #os.environ["MONGODB_PEM"] = results["output"]
+        #print os.environ["MONGODB_PEM"]
+        
+        self.successful_output(output=resource)
+
+    def create(self):
+
+        cmd = 'openssl rand -base64 756'
+
+        results = self.execute(cmd)
+
+        resource = {"resource_type":"symmetric_key"}
+
+        resource["application"] = self.application
+        resource["provider"] = self.provider
+        resource["source_method"] = self.source_method
+        resource["encrypt_fields"] = self.encrypt_fields
+
+        resource['name'] = "{}_key_file".format(self.inputargs["name"])
+        resource['id'] = self.get_hash(resource)
+        resource["contents"] = results["output"]
+        resource['_id'] = resource['id']
+        resource["tags"] = [ "mongodb", "mongodb_key_file", "replica_set_key" ]
+
+        self.successful_output(output=resource)
+
+def usage():
+
+    print """
+script + environmental variables
+
+or
+
+script + json_input (as argument)
+
+environmental variables:
+
+    create:
+        JOB_INSTANCE_ID (optional)
+        SCHEDULE_ID (optional)
+
+       """
+    exit(4)
+
+if __name__ == '__main__':
+
+    try:
+        json_input = sys.argv[1]
+    except:
+        json_input = None
+
+    main = Main()
+
+    if json_input:
+        main.set_inputargs(json_input=json_input)
+    else:
+        set_env_vars = [ "job_instance_id",
+                         "schedule_id",
+                         "name",
+                         "method",
+                         "run_id" ]
+
+        main.set_inputargs(set_env_vars=set_env_vars)
+   
+    method = main.inputargs.get("method")
+
+    if not method:
+        print "method/ENV VARIABLE METHOD is needed"
+        exit(4)
+
+    if method == "create":
+
+        main.check_required_inputargs(keys=["name"])
+        main.create()
+
+    elif method == "create_ssl":
+
+        main.check_required_inputargs(keys=["name"])
+        main.create_ssl()
+
+    else:
+        usage()
+        print 'method "{}" not supported!'.format(method)
+        exit(4)
