@@ -7,4 +7,4 @@
   become_method: sudo
   gather_facts: no
   roles:
-    - init_replica_nodes
+      - add_slaves_to_replica

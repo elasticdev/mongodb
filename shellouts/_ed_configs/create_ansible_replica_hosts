@@ -1,0 +1,303 @@
+#!/usr/bin/env python
+#
+#This file is part of "jiffy".
+#
+#Project: jiffy: A product for building and managing infrastructure: 
+#cloud provider services, and servers and their configurations.
+#
+#Description: A product for building and managing infrastructure. 
+#This includes third party API calls for services such as virtual
+#cloud servers, load balancers, databases, and other. The product 
+#manages connectivity and appropriate communication among these 
+#aws.
+#
+#Copyright (C) Gary Leong - All Rights Reserved
+#Unauthorized copying of this file, via any medium is strictly prohibited
+#Proprietary and confidential
+#Written by Gary Leong  <gwleong@gmail.com, September 17,2015
+
+import os
+import re
+import sys
+import jinja2
+
+from ed_helper_publisher.utilities import OnDiskTmpDir
+from ed_helper_publisher.loggerly import ElasticDevLogger
+from ed_helper_publisher.resource_manage import ResourceCmdHelper
+
+
+def list_files(rootdir,ignores=[ ".pyc$", ".swp$"],split_dir="global_templates"):
+
+    if not os.path.exists(rootdir): return 
+
+    # get a base file lists
+    base_files = []
+
+    for root, subFolders, files in os.walk(rootdir):
+        tempList = []
+
+        for file in files:
+            f = os.path.join(root,file)
+            tempList.append(f)
+
+        if not tempList: continue
+
+        if ignores:
+            for file in tempList:
+                add = True
+                for ignore in ignores:
+                    if re.search(ignore,file):
+                        add = False
+                        break
+                if add: base_files.append(file)
+        else:
+            base_files.extend(tempList)
+
+    # categorize files
+
+    fileList = []
+
+    for _file in base_files:
+        _rel_file = _file.split("{}/".format(split_dir))[-1]
+
+        filename = os.path.basename(_rel_file)
+        
+        try:
+            directory = os.path.dirname(_rel_file)
+        except:
+            directory = None
+
+        _finput = { "file":_file,
+                    "filename":filename,
+                    "directory":directory }
+
+        fileList.append(_finput)
+
+    return fileList
+
+class Main(ResourceCmdHelper):
+
+    def __init__(self,**kwargs):
+
+        ResourceCmdHelper.__init__(self)
+        self.classname = 'MONGOB_ANSIBLE_HELPER'
+        self.logger = ElasticDevLogger(self.classname,logcategory="cloudprovider")
+        self.logger.debug("Instantiating %s" % self.classname)
+   
+    def _set_vars(self):
+
+        self.public_ips = self.inputargs["mongodb_public_ips"].split(",")
+        self.private_ips = self.inputargs["mongodb_private_ips"].split(",")
+
+        self.clobber = self.inputargs.get("clobber",True)
+        if self.clobber in [ "None", None, 'none' ]: self.clobber = None
+        
+        try:
+            self.main_public_ip,self.main_private_ip = os.environ.get("MONGODB_MAIN_IPS").split(",")
+        except:
+            self.main_public_ip = self.public_ips[0]
+            self.main_private_ip = self.private_ips[0]
+            self.logger.warn("MONGOD_MAIN_IPS not set")
+
+        if len(self.private_ips) > 1:
+            self.private_secondaries = self.private_ips[1:]
+        else:
+            self.private_secondaries = None
+
+        self.ansible_build_dir = os.environ.get("ANSIBLE_BUILD_DIR","/var/tmp/build/docker")
+        self.config_file_path = "{}/hosts".format(self.ansible_build_dir)
+        self.config_file = open(self.config_file_path,"w")
+        self.template_dir = "{}/global_templates".format(self.ansible_build_dir)
+
+    def _write_file(self,key,filepath):
+
+        if not self.inputargs.get(key): return
+
+        with open(filepath,"wb") as wfile:
+            for _line in self.inputargs[key].split('\\n'):
+                wfile.write(_line)
+                wfile.write("\n")
+
+    def _create_mongodb_keyfile(self):
+
+        filepath = os.path.join(self.ansible_build_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
+        self._write_file("mongodb_keyfile",filepath)
+        #os.system("chmod 400 {}".format(filepath))
+
+    def _create_mongodb_pem(self):
+
+        filepath = os.path.join(self.ansible_build_dir,"roles","init_replica_nodes","files","mongodb.pem")
+        self._write_file("mongodb_pem",filepath)
+        os.system("chmod 400 {}".format(filepath))
+        
+    def _create_ssh_key(self):
+
+        filepath = "{}/ssh_key.pem".format(self.ansible_build_dir)
+        self._write_file("ansible_prv_key",filepath)
+        os.system("chmod 400 {}".format(filepath))
+        
+    def _add_public(self):
+
+        self.config_file.write('[public]')
+        self.config_file.write("\n")
+
+        for _ip in self.public_ips:
+            self.config_file.write(_ip)
+            self.config_file.write("\n")
+
+        self.config_file.write("\n")
+
+    def _add_main(self):
+
+        self.config_file.write('[public_main]')
+        self.config_file.write("\n")
+        self.config_file.write(self.main_public_ip)
+        self.config_file.write("\n")
+        self.config_file.write("\n")
+        self.config_file.write('[private_main]')
+        self.config_file.write("\n")
+        self.config_file.write(self.main_private_ip)
+        self.config_file.write("\n")
+        self.config_file.write("\n")
+
+    def _add_secondaries(self):
+
+        if not self.private_secondaries: return
+
+        self.config_file.write('[private-secondaries]')
+        self.config_file.write("\n")
+
+        for _ip in self.private_secondaries:
+            self.config_file.write(_ip)
+            self.config_file.write("\n")
+
+        self.config_file.write("\n")
+
+    def _templify(self,**kwargs):
+
+        if not os.environ.get("ED_TEMPLATE_VARS"):
+            self.logger.warn("ED_TEMPLATE_VARS not set - skipping templating")
+            #os.chdir(self.run_dir)
+            return
+
+        _template_vars = [ _var.strip() for _var in os.environ.get("ED_TEMPLATE_VARS").split(",") ]
+
+        if not _template_vars:
+            self.logger.warn("ED_TEMPLATE_VARS not set - skipping templating")
+            return
+
+        for _file_stats in list_files(self.template_dir):
+
+            template_filepath = _file_stats["file"]
+            file_dir = os.path.join(self.ansible_build_dir,_file_stats["directory"])
+            file_path = os.path.join(self.ansible_build_dir,_file_stats["directory"],_file_stats["filename"].split(".ja2")[0])
+
+            if not os.path.exists(file_dir): 
+                os.system("mkdir -p {}".format(file_dir))
+
+            if os.path.exists(file_path) and not self.clobber:
+                self.logger.warn("destination templated file already exists at {} - skipping templifying of it".format(file_path))
+                continue
+
+            self.logger.debug("creating templated file file {} from {}".format(file_path,template_filepath))
+
+            templateVars = {}
+
+            for _var in _template_vars:
+                var = _var.strip().upper()
+
+                if not os.environ.get(var): 
+                    #self.logger.debug("cannot find {} to templify".format(var))
+                    continue
+
+                templateVars[var] = os.environ[var].replace("'",'"')
+
+            templateLoader = jinja2.FileSystemLoader(searchpath="/")
+            templateEnv = jinja2.Environment(loader=templateLoader)
+            template = templateEnv.get_template(template_filepath)
+            outputText = template.render( templateVars )
+            writefile = open(file_path,"wb")
+            writefile.write(outputText)
+            writefile.close()
+        
+    def create(self):
+
+        # [public]
+        # 13.212.156.196
+        # 13.212.111.66
+        # 13.229.147.37
+        # 
+        # [public_main]
+        # 13.212.156.196
+        # 
+        # [private-main]
+        # 172.31.5.4
+        # 
+        # [private-secondaries]
+        # 172.31.10.21
+        # 172.31.1.231
+
+        self._set_vars()
+        self._templify()
+        self._create_ssh_key()
+        self._create_mongodb_keyfile()
+        self._create_mongodb_pem()
+        self._add_public()
+        self._add_main()
+        self._add_secondaries()
+        self.config_file.close()
+ 
+        self.logger.debug("Created Ansible host config file {}".format(self.config_file_path))
+
+def usage():
+
+    print """
+script + environmental variables
+
+or
+
+script + json_input (as argument)
+
+environmental variables:
+
+    create:
+        MONGODB_PUBLIC_IPS
+        MONGODB_PRIVATE_IPS
+        JOB_INSTANCE_ID (optional)
+        SCHEDULE_ID (optional)
+
+       """
+    exit(4)
+
+if __name__ == '__main__':
+
+    try:
+        json_input = sys.argv[1]
+    except:
+        json_input = None
+
+    main = Main()
+
+    set_env_vars = [ "job_instance_id",
+                     "schedule_id",
+                     "ansible_prv_key",
+                     "mongodb_keyfile",
+                     "mongodb_pem",
+                     "mongodb_public_ips",
+                     "mongodb_private_ips",
+                     "method",
+                     "run_id" ]
+
+    main.set_inputargs(set_env_vars=set_env_vars)
+   
+    method = main.inputargs.get("method","create")
+
+    if method == "create":
+
+        main.check_required_inputargs(keys=["mongodb_public_ips","mongodb_private_ips"])
+        main.create()
+
+    else:
+        usage()
+        print 'method "{}" not supported!'.format(method)
+        exit(4)

@@ -4,5 +4,5 @@
   roles:
     - role: mongodb
       mongodb_repl_set_name: rs0
-      mongodb_keyfile: roles/replicaset/files/mongodb_keyfile
+      mongodb_keyfile: roles/init_replica_nodes/files/mongodb_keyfile
       # mongodb_repl_oplog_size: 51200

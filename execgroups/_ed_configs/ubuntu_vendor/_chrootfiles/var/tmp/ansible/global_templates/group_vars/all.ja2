@@ -1,7 +1,7 @@
 ---
 os_user: ubuntu
-mongodb_admin_user: main
-mongodb_admin_pass: admin123
+mongodb_admin_user: {{ MONGODB_USERNAME }}
+mongodb_admin_pass: {{ MONGODB_PASSWORD }}
 mongodb_version: 4.0.3
 mongodb_port: 27017
 mongodb_bind_ip: 0.0.0.0

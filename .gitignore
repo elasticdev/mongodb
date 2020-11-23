@@ -1,1 +1,2 @@
 execgroups/_ed_configs/ubuntu_vendor/_chrootfiles/var/tmp/ansible/ssh_key.pem
+*.swp
