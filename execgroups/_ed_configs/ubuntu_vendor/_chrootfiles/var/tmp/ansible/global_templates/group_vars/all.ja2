@@ -9,6 +9,7 @@ mongodb_dbpath: /var/lib/mongodb
 mongodb_logpath: /var/log/mongodb/mongod.log
 mongodb_security_path: /etc/mongodb/security
 mongodb_keyfile_path: /etc/mongodb/security/mongodb_keyfile
+mongodb_pem_path: /etc/mongodb/security/mongo.pem
 mongodb_servicefile_path: /etc/systemd/system/mongodb.service
 mongodb_servicefile: files/mongodb.service
 mongodb_storage_engine: "wiredTiger"

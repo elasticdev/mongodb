@@ -53,6 +53,16 @@
         - "{{ mongodb_security_path }}"
         - "{{ mongodb_logpath | dirname }}"
 
+    - name: copy mongodb pem file for ssl
+      copy:
+        dest: "{{ mongodb_pem_path }}"
+        owner: "{{ mongodb_user }}"
+        group: "{{ mongodb_group }}"
+        mode: 0600
+        src: "{{ mongodb_pem }}"
+      notify: restart mongodb
+      when: "{{ mongodb_pem is defined }}"
+
     - name: copy mongodb replication keyfile
       copy:
         dest: "{{ mongodb_keyfile_path }}"

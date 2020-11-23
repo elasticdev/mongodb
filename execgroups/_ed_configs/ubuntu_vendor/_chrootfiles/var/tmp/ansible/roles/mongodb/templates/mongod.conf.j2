@@ -31,6 +31,12 @@ security:
   clusterAuthMode: keyFile
   keyFile: {{ mongodb_keyfile_path }}
 {% endif %}
+{% if mongodb_pem is defined %}
+net:
+   ssl:
+      mode: requireSSL
+      PEMKeyFile: {{ mongodb_pem_path }}
+{% endif %}
 {% if not mongodb_enable_localhost_auth_bypass %}
 setParameter:
   enableLocalhostAuthBypass: false
