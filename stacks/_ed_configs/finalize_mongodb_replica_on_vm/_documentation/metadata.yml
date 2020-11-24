@@ -1,0 +1,18 @@
+desc: The stack that finalizes the Mongodb install and setup 
+release: 0.0.1
+categories: 
+   - database
+   - mongodb
+   - replica
+   - ansible
+tags:
+   - ansible
+   - mongodb
+   - replica
+   - vms
+   - database
+   - infrastructure
+   - featured_infrastructure
+   - featured
+   - cloud
+   - public_cloud
