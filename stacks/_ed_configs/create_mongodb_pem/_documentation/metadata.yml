@@ -1,0 +1,25 @@
+desc: The stack creates the mongo pem needed for self signed SSl connection.
+release: 0.0.1
+categories: 
+   - database
+   - mongodb
+   - security
+   - tls
+   - ssl
+   - replica
+   - ansible
+tags:
+   - ansible
+   - mongodb
+   - security
+   - pem
+   - tls
+   - ssl
+   - replica
+   - vms
+   - database
+   - infrastructure
+   - featured_infrastructure
+   - featured
+   - cloud
+   - public_cloud

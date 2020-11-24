@@ -1,0 +1,25 @@
+desc: The stack creates mongodb keyfile used for replication
+release: 0.0.1
+categories: 
+   - database
+   - mongodb
+   - security
+   - tls
+   - ssl
+   - replica
+   - ansible
+tags:
+   - ansible
+   - mongodb
+   - security
+   - keyfile
+   - tls
+   - ssl
+   - replica
+   - vms
+   - database
+   - infrastructure
+   - featured_infrastructure
+   - featured
+   - cloud
+   - public_cloud

@@ -1,49 +1,62 @@
 def run(stackargs):
 
-    import json
-
     # instantiate authoring stack
     stack = newStack(stackargs)
 
     # Add default variables
     stack.parse.add_required(key="dockerhosts")
     stack.parse.add_required(key="name")
-    stack.parse.add_required(key="ssh_key_name")
+
     stack.parse.add_required(key="vm_username",default="ubuntu")
+    stack.parse.add_required(key="ssh_key_name",default="_random")
     stack.parse.add_required(key="mongodb_username",default="_random")
     stack.parse.add_required(key="mongodb_password",default="_random")
 
-    # Add shelloutconfig dependencies
-    stack.add_shelloutconfig('elasticdev:::mongodb::create_keys')
-
     # Add substack
+    stack.add_substack('elasticdev:::create_mongodb_pem')
+    stack.add_substack('elasticdev:::create_mongodb_keyfile')
     stack.add_substack('elasticdev:::finalize_mongodb_replica_on_vm')
 
     # Initialize 
     stack.init_substacks()
-    stack.init_shelloutconfigs()
 
-    # Create mongodb_keyfile for MongoDb replication
-    env_vars = {"INSERT_IF_EXISTS":True}
-    env_vars["NAME"] = stack.name
-    env_vars["METHOD"] = "create"
+    # lookup ssh key. if it does not exist, then create
+    _lookup = {"must_exists":None}
+    _lookup["resource_type"] = "ssh_key_pair"
+    _lookup["name"] = stack.ssh_key_name
 
-    inputargs = {"display":True}
-    inputargs["human_description"] = 'Create mongodb_keyfile for MongoDb replication'
-    inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["automation_phase"] = "infrastructure"
-    stack.create_keys.resource_exec(**inputargs)
+    if not list(stack.get_resource(**_lookup)):
+        cmd = "ssh_key create"
+        order_type = "create-ssh_key::api"
+        role = "cloud/ec2"
 
-    # Create mongodb.pem for MongoDb SSL
-    env_vars = {"INSERT_IF_EXISTS":True}
-    env_vars["NAME"] = stack.name
-    env_vars["METHOD"] = "create_ssl"
+        default_values = {"name":stack.ssh_key_name}
+        human_description = "Generate new ssh_key {} if it does not exists".format(stack.ssh_key_name)
 
-    inputargs = {"display":True}
-    inputargs["human_description"] = 'Create mongodb.pem for MongoDb SSL'
-    inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["automation_phase"] = "infrastructure"
-    stack.create_keys.resource_exec(**inputargs)
+        stack.insert_builtin_cmd(cmd,
+                                 order_type=order_type,
+                                 role=role,
+                                 human_description=human_description,
+                                 display=True,
+                                 default_values=default_values)
+
+    # lookup mongodb pem file needed for ssl/tls connection
+    _lookup = {"must_exists":None}
+    _lookup["resource_type"] = "ssl_pem"
+    _lookup["provider"] = "openssl"
+    _lookup["name"] = "{}.pem".format(stack.name)
+    if not list(stack.get_resource(**_lookup)):
+        inputargs = {"name":stack.name}
+        stack.create_mongodb_pem.insert(display=True,**inputargs)
+
+    # lookup mongodb keyfile needed for secure mongodb replication
+    _lookup = {"must_exists":None}
+    _lookup["provider"] = "openssl"
+    _lookup["resource_type"] = "symmetric_key"
+    _lookup["name"] = "{}_keyfile".format(stack.name)
+    if not list(stack.get_resource(**_lookup)):
+        inputargs = {"name":stack.name}
+        stack.create_mongodb_keyfile.insert(display=True,**inputargs)
 
     # Finalize the mongodb replica set
     default_values = {"dockerhosts":stack.dockerhosts}

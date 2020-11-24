@@ -82,6 +82,7 @@ class Main(ResourceCmdHelper):
         resource["length"] = self.cert_length
         resource['id'] = self.get_hash(resource)
         resource["contents"] = results["output"]
+        resource["no_dependency"] = True
         resource['_id'] = resource['id']
         resource["tags"] = [ "mongodb", "mongodb.pem", "pem", "ssl" ]
 
@@ -105,7 +106,7 @@ class Main(ResourceCmdHelper):
         resource["source_method"] = self.source_method
         resource["encrypt_fields"] = self.encrypt_fields
 
-        resource['name'] = "{}_key_file".format(self.inputargs["name"])
+        resource['name'] = "{}_keyfile".format(self.inputargs["name"])
         resource['id'] = self.get_hash(resource)
         resource["contents"] = results["output"]
         resource['_id'] = resource['id']
