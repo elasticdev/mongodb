@@ -20,26 +20,6 @@ def run(stackargs):
     # Initialize 
     stack.init_substacks()
 
-    # lookup ssh key. if it does not exist, then create
-    _lookup = {"must_exists":None}
-    _lookup["resource_type"] = "ssh_key_pair"
-    _lookup["name"] = stack.ssh_key_name
-
-    if not list(stack.get_resource(**_lookup)):
-        cmd = "ssh_key create"
-        order_type = "create-ssh_key::api"
-        role = "cloud/ec2"
-
-        default_values = {"name":stack.ssh_key_name}
-        human_description = "Generate new ssh_key {} if it does not exists".format(stack.ssh_key_name)
-
-        stack.insert_builtin_cmd(cmd,
-                                 order_type=order_type,
-                                 role=role,
-                                 human_description=human_description,
-                                 display=True,
-                                 default_values=default_values)
-
     # lookup mongodb pem file needed for ssl/tls connection
     _lookup = {"must_exists":None}
     _lookup["resource_type"] = "ssl_pem"
