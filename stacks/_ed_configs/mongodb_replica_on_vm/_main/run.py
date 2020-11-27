@@ -6,7 +6,6 @@ def run(stackargs):
     # Add default variables
     stack.parse.add_required(key="dockerhosts")
     stack.parse.add_required(key="name")
-
     stack.parse.add_required(key="vm_username",default="ubuntu")
     stack.parse.add_required(key="ssh_key_name",default="_random")
     stack.parse.add_required(key="mongodb_username",default="_random")
@@ -15,7 +14,7 @@ def run(stackargs):
     # Add substack
     stack.add_substack('elasticdev:::create_mongodb_pem')
     stack.add_substack('elasticdev:::create_mongodb_keyfile')
-    stack.add_substack('elasticdev:::finalize_mongodb_replica_on_vm')
+    stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_vm')
 
     # Initialize 
     stack.init_substacks()
@@ -50,6 +49,6 @@ def run(stackargs):
     human_description = 'Finalizing mongodb replica set and init'
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
-    stack.finalize_mongodb_replica_on_vm.insert(display=True,**inputargs)
+    stack._finalize_mongodb_replica_on_vm.insert(display=True,**inputargs)
 
     return stack.get_results()
