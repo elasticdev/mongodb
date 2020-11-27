@@ -8,7 +8,7 @@ def run(stackargs):
     stack.parse.add_required(key="num_of_replicas",default="1")
 
     stack.parse.add_required(key="vm_username",default="ubuntu")
-    stack.parse.add_required(key="ssh_key_name",default="_random")
+    stack.parse.add_required(key="ssh_keyname",default="_random")
     stack.parse.add_required(key="mongodb_username",default="_random")
     stack.parse.add_required(key="mongodb_password",default="_random")
 
@@ -22,6 +22,9 @@ def run(stackargs):
     stack.parse.add_optional(key="security_groups",default="null")
     stack.parse.add_optional(key="vpc_name",default="null")
     stack.parse.add_optional(key="subnet",default="null")
+    stack.parse.add_optional(key="size",default="t3.micro")
+    stack.parse.add_optional(key="disksize",default="20")
+    stack.parse.add_optional(key="ip_key",default="private_ip")
 
     stack.parse.add_optional(key="tags",default="null")
     stack.parse.add_optional(key="labels",default="null")
@@ -37,12 +40,14 @@ def run(stackargs):
 
         hostname = "{}-replica-num-{}".format(num).replace("_","-")
         default_values = {"hostname":hostname}
-        default_values["key_name"] = stack.ssh_key_name
+        default_values["keyname"] = stack.ssh_keyname
         default_values["image"] = stack.image
         default_values["aws_default_region"] = stack.aws_default_region
         default_values["security_groups"] = stack.security_groups
         default_values["vpc_name"] = stack.vpc_name
         default_values["subnet"] = stack.subnet
+        default_values["size"] = stack.size
+        default_values["disksize"] = stack.disksize
 
         inputargs = {"default_values":default_values}
         human_description = "Creating hostname {} on ec2".format(hostname)
