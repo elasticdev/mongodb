@@ -4,13 +4,13 @@ def run(stackargs):
     stack = newStack(stackargs)
 
     # Add default variables
-    stack.parse.add_required(key="name")
+    stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="num_of_replicas",default="1")
+    stack.parse.add_required(key="mongodb_username",default="_random")
+    stack.parse.add_required(key="mongodb_password",default="_random")
 
     stack.parse.add_required(key="vm_username",default="ubuntu")
     stack.parse.add_required(key="ssh_keyname",default="_random")
-    stack.parse.add_required(key="mongodb_username",default="_random")
-    stack.parse.add_required(key="mongodb_password",default="_random")
 
     # Testingyoyo
     #stack.parse.add_required(key="image")
@@ -33,12 +33,12 @@ def run(stackargs):
     stack.add_substack('elasticdev:::ec2_ubuntu')
 
     # Initialize 
+    stack.init_variables()
     stack.init_substacks()
 
-    # Testingyoyo
     for num in range(int(stack.num_of_replicas)):
 
-        hostname = "{}-replica-num-{}".format(num).replace("_","-")
+        hostname = "{}-replica-num-{}".format(stack.mongodb_cluster,num).replace("_","-")
         default_values = {"hostname":hostname}
         default_values["keyname"] = stack.ssh_keyname
         default_values["image"] = stack.image
