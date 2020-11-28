@@ -48,6 +48,7 @@ def run(stackargs):
         default_values["subnet"] = stack.subnet
         default_values["size"] = stack.size
         default_values["disksize"] = stack.disksize
+        default_values["register_to_ed"] = None
 
         inputargs = {"default_values":default_values}
         human_description = "Creating hostname {} on ec2".format(hostname)
