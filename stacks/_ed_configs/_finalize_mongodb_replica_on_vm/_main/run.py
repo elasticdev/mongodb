@@ -58,10 +58,14 @@ def run(stackargs):
     env_vars["MONGODB_PUBLIC_IPS"] = ",".join(public_ips)
     env_vars["MONGODB_PRIVATE_IPS"] = ",".join(private_ips)
     env_vars["ANSIBLE_PRV_KEY"] = private_key
+
+    env_vars["mongodb_username".upper()] = stack.mongodb_username
+    env_vars["mongodb_password".upper()] = stack.mongodb_password
+    env_vars["ED_TEMPLATE_VARS"] = "{},{}".format("mongodb_username".upper(),"mongodb_password".upper())
+
     env_vars["stateful_id".upper()] = stack.stateful_id
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
     #env_vars["ANSIBLE_BUILD_DIR"] = "/var/tmp/build/ansible"
-    env_vars["docker_exec_env".upper()] = stack.docker_exec_env
     env_vars["METHOD"] = "create"
     env_vars["USE_DOCKER"] = True
     env_vars["CLOBBER"] = True
