@@ -36,6 +36,19 @@ def run(stackargs):
     stack.init_variables()
     stack.init_substacks()
 
+    # reference pt
+    description = "Checkpoint - {}".format(stack.random_id(size=8).lower())
+
+    cmd = 'echo "{}"'.format(description)
+
+    stack.add_external_cmd(cmd=cmd,
+                           order_type="empty_stack::shellout",
+                           human_description=description,
+                           display=False,
+                           role="external/cli/execute")
+
+    stack.set_parallel()
+
     for num in range(int(stack.num_of_replicas)):
 
         hostname = "{}-replica-num-{}".format(stack.mongodb_cluster,num).replace("_","-")
