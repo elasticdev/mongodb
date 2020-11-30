@@ -18,6 +18,7 @@ def run(stackargs):
     stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_ubuntu')
 
     # Initialize 
+    stack.init_variables()
     stack.init_substacks()
 
     # lookup mongodb pem file needed for ssl/tls connection
@@ -26,7 +27,7 @@ def run(stackargs):
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
     if not list(stack.get_resource(**_lookup)):
-        inputargs = {"name":stack.mongodb_cluster}
+        inputargs = {"basename":stack.mongodb_cluster}
         stack.create_mongodb_pem.insert(display=True,**inputargs)
 
     # lookup mongodb keyfile needed for secure mongodb replication
@@ -35,7 +36,7 @@ def run(stackargs):
     _lookup["resource_type"] = "symmetric_key"
     _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
     if not list(stack.get_resource(**_lookup)):
-        inputargs = {"name":stack.mongodb_cluster}
+        inputargs = {"basename":stack.mongodb_cluster}
         stack.create_mongodb_keyfile.insert(display=True,**inputargs)
 
     # Finalize the mongodb replica set
