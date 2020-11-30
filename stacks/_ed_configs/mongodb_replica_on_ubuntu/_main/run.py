@@ -26,7 +26,7 @@ def run(stackargs):
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
-    if not list(stack.get_resource(**_lookup)):
+    if not stack.get_resource(**_lookup):
         inputargs = {"basename":stack.mongodb_cluster}
         stack.create_mongodb_pem.insert(display=True,**inputargs)
 
@@ -35,7 +35,7 @@ def run(stackargs):
     _lookup["provider"] = "openssl"
     _lookup["resource_type"] = "symmetric_key"
     _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
-    if not list(stack.get_resource(**_lookup)):
+    if not stack.get_resource(**_lookup):
         inputargs = {"basename":stack.mongodb_cluster}
         stack.create_mongodb_keyfile.insert(display=True,**inputargs)
 
