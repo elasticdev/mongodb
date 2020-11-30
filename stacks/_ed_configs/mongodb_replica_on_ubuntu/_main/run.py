@@ -29,7 +29,8 @@ def run(stackargs):
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
     if not stack.get_resource(**_lookup):
-        inputargs = {"basename":stack.mongodb_cluster}
+        default_values = {"basename":stack.mongodb_cluster}
+        inputargs = {"default_values":default_values}
         stack.create_mongodb_pem.insert(display=True,**inputargs)
 
     # lookup mongodb keyfile needed for secure mongodb replication
@@ -38,7 +39,8 @@ def run(stackargs):
     _lookup["resource_type"] = "symmetric_key"
     _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
     if not stack.get_resource(**_lookup):
-        inputargs = {"basename":stack.mongodb_cluster}
+        default_values = {"basename":stack.mongodb_cluster}
+        inputargs = {"default_values":default_values}
         stack.create_mongodb_keyfile.insert(display=True,**inputargs)
 
     stack.unset_parallel(wait_all=True)
