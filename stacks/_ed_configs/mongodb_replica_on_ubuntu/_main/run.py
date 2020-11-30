@@ -21,6 +21,8 @@ def run(stackargs):
     stack.init_variables()
     stack.init_substacks()
 
+    stack.set_parallel()
+
     # lookup mongodb pem file needed for ssl/tls connection
     _lookup = {"must_exists":None}
     _lookup["resource_type"] = "ssl_pem"
@@ -38,6 +40,8 @@ def run(stackargs):
     if not stack.get_resource(**_lookup):
         inputargs = {"basename":stack.mongodb_cluster}
         stack.create_mongodb_keyfile.insert(display=True,**inputargs)
+
+    stack.unset_parallel(wait_all=True)
 
     # Finalize the mongodb replica set
     default_values = {"mongodb_cluster":stack.mongodb_cluster}

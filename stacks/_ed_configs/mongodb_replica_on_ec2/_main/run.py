@@ -37,17 +37,6 @@ def run(stackargs):
     stack.init_variables()
     stack.init_substacks()
 
-    # reference pt
-    description = "Checkpoint - {}".format(stack.random_id(size=8).lower())
-
-    cmd = 'echo "{}"'.format(description)
-
-    stack.add_external_cmd(cmd=cmd,
-                           order_type="empty_stack::shellout",
-                           human_description=description,
-                           display=False,
-                           role="external/cli/execute")
-
     stack.set_parallel()
 
     mongodb_hosts = []
@@ -73,6 +62,8 @@ def run(stackargs):
         inputargs["automation_phase"] = "infrastructure"
         inputargs["human_description"] = human_description
         stack.ec2_ubuntu.insert(display=True,**inputargs)
+
+    stack.unset_parallel(wait_all=True)
 
     # provide the mongodb_hosts and begin installing the mongo specific 
     # package and replication

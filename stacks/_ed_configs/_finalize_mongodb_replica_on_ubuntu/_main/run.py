@@ -44,6 +44,8 @@ def run(stackargs):
     _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
     mongodb_keyfile = list(stack.get_resource(**_lookup))[0]["contents"]
 
+    #stack.set_parallel(wait_all=True)
+
     public_ips = []
     private_ips = []
     for mongodb_host in stack.mongodb_hosts.split(","):
