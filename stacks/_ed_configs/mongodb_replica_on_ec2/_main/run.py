@@ -79,7 +79,7 @@ def run(stackargs):
     # package and replication
     default_values = {"mongodb_cluster":stack.mongodb_cluster}
     default_values["ssh_keyname"] = stack.ssh_keyname
-    default_values["mongodb_hosts"] = stack.mongodb_hosts
+    default_values["mongodb_hosts"] = mongodb_hosts
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
     if stack.vm_username: default_values["vm_username"] = stack.vm_username
