@@ -6,11 +6,12 @@ def run(stackargs):
     # Add default variables
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="num_of_replicas",default="1")
-    stack.parse.add_required(key="mongodb_username",default="_random")
-    stack.parse.add_required(key="mongodb_password",default="_random")
 
-    stack.parse.add_required(key="vm_username",default="ubuntu")
-    stack.parse.add_required(key="ssh_keyname",default="_random")
+    stack.parse.add_optional(key="mongodb_username",default="null")
+    stack.parse.add_optional(key="mongodb_password",default="null")
+
+    stack.parse.add_optional(key="vm_username",default="null")
+    stack.parse.add_optional(key="ssh_keyname",default="null")
 
     # Testingyoyo
     #stack.parse.add_required(key="image")
@@ -31,6 +32,7 @@ def run(stackargs):
 
     # Add substack
     stack.add_substack('elasticdev:::ec2_ubuntu')
+    stack.add_substack('elasticdev:::mongodb_replica_on_ubuntu')
 
     # Initialize 
     stack.init_variables()
@@ -49,9 +51,13 @@ def run(stackargs):
 
     stack.set_parallel()
 
+    mongodb_hosts = []
+
     for num in range(int(stack.num_of_replicas)):
 
         hostname = "{}-replica-num-{}".format(stack.mongodb_cluster,num).replace("_","-")
+        mongodb_hosts.append(hostname)
+
         default_values = {"hostname":hostname}
         default_values["keyname"] = stack.ssh_keyname
         default_values["image"] = stack.image
@@ -68,5 +74,20 @@ def run(stackargs):
         inputargs["automation_phase"] = "infrastructure"
         inputargs["human_description"] = human_description
         stack.ec2_ubuntu.insert(display=True,**inputargs)
+
+    # provide the mongodb_hosts and begin installing the mongo specific 
+    # package and replication
+    default_values = {"mongodb_cluster":stack.mongodb_cluster}
+    default_values["ssh_keyname"] = stack.ssh_keyname
+    default_values["mongodb_hosts"] = stack.mongodb_hosts
+    if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
+    if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
+    if stack.vm_username: default_values["vm_username"] = stack.vm_username
+
+    inputargs = {"default_values":default_values}
+    human_description = "Initialing Ubuntu specific actions"
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["human_description"] = human_description
+    stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
 
     return stack.get_results()

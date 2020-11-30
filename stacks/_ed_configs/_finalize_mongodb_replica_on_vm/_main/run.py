@@ -6,9 +6,9 @@ def run(stackargs):
     stack = newStack(stackargs)
 
     # Add default variables
-    stack.parse.add_required(key="dockerhosts")
-    stack.parse.add_required(key="name")
-    stack.parse.add_required(key="ssh_key_name")
+    stack.parse.add_required(key="mongodb_hosts")
+    stack.parse.add_required(key="mongodb_cluster")
+    stack.parse.add_required(key="ssh_keyname")
     stack.parse.add_required(key="vm_username",default="ubuntu")
     stack.parse.add_required(key="mongodb_username",default="_random")
     stack.parse.add_required(key="mongodb_password",default="_random")
@@ -25,29 +25,29 @@ def run(stackargs):
     # get ssh_key
     _lookup = {"must_exists":True}
     _lookup["resource_type"] = "ssh_key_pair"
-    _lookup["name"] = stack.ssh_key_name
+    _lookup["name"] = stack.ssh_keyname
     private_key = list(stack.get_resource(**_lookup))[0]["private_key"]
 
     # get mongodb pem key
     _lookup = {"must_exists":True}
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
-    _lookup["name"] = "{}.pem".format(stack.name)
+    _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
     mongodb_pem = list(stack.get_resource(**_lookup))[0]["contents"]
 
     # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":True}
     _lookup["provider"] = "openssl"
     _lookup["resource_type"] = "symmetric_key"
-    _lookup["name"] = "{}_keyfile".format(stack.name)
+    _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
     mongodb_keyfile = list(stack.get_resource(**_lookup))[0]["contents"]
 
     public_ips = []
     private_ips = []
-    for dockerhost in stack.dockerhosts.split(","):
+    for mongodb_host in stack.mongodb_hosts.split(","):
         _lookup = {"must_exists":True}
         _lookup["resource_type"] = "server"
-        _lookup["hostname"] = dockerhost.strip()
+        _lookup["hostname"] = mongodb_host.strip()
         _host_info = list(stack.get_resource(**_lookup))[0]
         public_ips.append(_host_info["public_ip"])
         private_ips.append(_host_info["private_ip"])
@@ -78,9 +78,9 @@ def run(stackargs):
 
     inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["name"] = stack.name
+    inputargs["name"] = stack.mongodb_cluster
     inputargs["stateful_id"] = stack.stateful_id
-    inputargs["human_description"] = "Creating MongoDB Replica set {}".format(stack.name)
+    inputargs["human_description"] = "Creating MongoDB Replica set {}".format(stack.mongodb_cluster)
     stack.ubuntu_vendor.insert(**inputargs)
 
     return stack.get_results()
