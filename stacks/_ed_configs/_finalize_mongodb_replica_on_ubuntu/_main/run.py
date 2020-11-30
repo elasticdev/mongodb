@@ -9,9 +9,11 @@ def run(stackargs):
     stack.parse.add_required(key="mongodb_hosts")
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="ssh_keyname")
-    stack.parse.add_required(key="vm_username",default="ubuntu")
-    stack.parse.add_required(key="mongodb_username",default="_random")
-    stack.parse.add_required(key="mongodb_password",default="_random")
+
+    stack.parse.add_optional(key="mongodb_username",default="_random")
+    stack.parse.add_optional(key="mongodb_password",default="_random")
+    stack.parse.add_optional(key="vm_username",default="ubuntu")
+
     stack.parse.add_required(key="stateful_id",default="_random")
     stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
 

@@ -6,12 +6,11 @@ def run(stackargs):
     # Add default variables
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="num_of_replicas",default="1")
+    stack.parse.add_required(key="ssh_keyname")
 
     stack.parse.add_optional(key="mongodb_username",default="null")
     stack.parse.add_optional(key="mongodb_password",default="null")
-
     stack.parse.add_optional(key="vm_username",default="null")
-    stack.parse.add_optional(key="ssh_keyname",default="null")
 
     # Testingyoyo
     #stack.parse.add_required(key="image")

@@ -6,15 +6,16 @@ def run(stackargs):
     # Add default variables
     stack.parse.add_required(key="mongodb_hosts")
     stack.parse.add_required(key="mongodb_cluster")
-    stack.parse.add_required(key="vm_username",default="ubuntu")
-    stack.parse.add_required(key="ssh_keyname",default="_random")
-    stack.parse.add_required(key="mongodb_username",default="_random")
-    stack.parse.add_required(key="mongodb_password",default="_random")
+    stack.parse.add_required(key="ssh_keyname")
+
+    stack.parse.add_optional(key="mongodb_username",default="null")
+    stack.parse.add_optional(key="mongodb_password",default="null")
+    stack.parse.add_optional(key="vm_username",default="ubuntu")
 
     # Add substack
     stack.add_substack('elasticdev:::create_mongodb_pem')
     stack.add_substack('elasticdev:::create_mongodb_keyfile')
-    stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_vm')
+    stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_ubuntu')
 
     # Initialize 
     stack.init_substacks()
@@ -41,9 +42,9 @@ def run(stackargs):
     default_values = {"mongodb_cluster":stack.mongodb_cluster}
     default_values["ssh_keyname"] = stack.ssh_keyname
     default_values["mongodb_hosts"] = stack.mongodb_hosts
+    default_values["vm_username"] = stack.vm_username
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
-    if stack.vm_username: default_values["vm_username"] = stack.vm_username
 
     inputargs = {"default_values":default_values}
     human_description = 'Finalizing mongodb replica set and init'
