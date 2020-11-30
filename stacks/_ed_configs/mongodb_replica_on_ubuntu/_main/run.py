@@ -56,6 +56,6 @@ def run(stackargs):
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
 
-    stack._finalize_mongodb_replica_on_vm.insert(display=True,**inputargs)
+    stack._finalize_mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
 
     return stack.get_results()
