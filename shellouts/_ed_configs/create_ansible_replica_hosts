@@ -104,10 +104,15 @@ class Main(ResourceCmdHelper):
         else:
             self.private_secondaries = None
 
-        self.ansible_build_dir = os.environ.get("ANSIBLE_BUILD_DIR","/var/tmp/build/ansible")
-        self.config_file_path = "{}/hosts".format(self.ansible_build_dir)
+        self.run_dir = os.getcwd()
+
+        working_subdir = os.environ.get("ANSIBLE_DIR","/var/tmp/ansible")
+        if working_subdir[0] == "/": working_subdir = working_subdir[1:]
+
+        self.ansible_dir = "{}/{}".format(self.run_dir,working_subdir)
+        self.config_file_path = "{}/hosts".format(self.ansible_dir)
         self.config_file = open(self.config_file_path,"w")
-        self.template_dir = "{}/global_templates".format(self.ansible_build_dir)
+        self.template_dir = "{}/global_templates".format(self.ansible_dir)
 
     def _write_file(self,key,filepath):
 
@@ -120,19 +125,19 @@ class Main(ResourceCmdHelper):
 
     def _create_mongodb_keyfile(self):
 
-        filepath = os.path.join(self.ansible_build_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
+        filepath = os.path.join(self.ansible_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
         self._write_file("mongodb_keyfile",filepath)
         #os.system("chmod 400 {}".format(filepath))
 
     def _create_mongodb_pem(self):
 
-        filepath = os.path.join(self.ansible_build_dir,"roles","init_replica_nodes","files","mongodb.pem")
+        filepath = os.path.join(self.ansible_dir,"roles","init_replica_nodes","files","mongodb.pem")
         self._write_file("mongodb_pem",filepath)
         os.system("chmod 400 {}".format(filepath))
         
     def _create_ssh_key(self):
 
-        filepath = "{}/ssh_key.pem".format(self.ansible_build_dir)
+        filepath = "{}/ssh_key.pem".format(self.ansible_dir)
         self._write_file("ansible_prv_key",filepath)
         os.system("chmod 400 {}".format(filepath))
         
@@ -189,8 +194,8 @@ class Main(ResourceCmdHelper):
         for _file_stats in list_files(self.template_dir):
 
             template_filepath = _file_stats["file"]
-            file_dir = os.path.join(self.ansible_build_dir,_file_stats["directory"])
-            file_path = os.path.join(self.ansible_build_dir,_file_stats["directory"],_file_stats["filename"].split(".ja2")[0])
+            file_dir = os.path.join(self.ansible_dir,_file_stats["directory"])
+            file_path = os.path.join(self.ansible_dir,_file_stats["directory"],_file_stats["filename"].split(".ja2")[0])
 
             if not os.path.exists(file_dir): 
                 os.system("mkdir -p {}".format(file_dir))

@@ -73,7 +73,7 @@ def run(stackargs):
 
     env_vars["stateful_id".upper()] = stack.stateful_id
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
-    #env_vars["ANSIBLE_BUILD_DIR"] = "/var/tmp/build/ansible"
+    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
     env_vars["METHOD"] = "create"
     env_vars["USE_DOCKER"] = True
     env_vars["CLOBBER"] = True
