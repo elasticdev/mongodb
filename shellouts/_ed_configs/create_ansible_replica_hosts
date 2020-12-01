@@ -80,7 +80,7 @@ class Main(ResourceCmdHelper):
     def __init__(self,**kwargs):
 
         ResourceCmdHelper.__init__(self)
-        self.classname = 'MONGOB_ANSIBLE_HELPER'
+        self.classname = 'MONGODB_ANSIBLE_HELPER'
         self.logger = ElasticDevLogger(self.classname,logcategory="cloudprovider")
         self.logger.debug("Instantiating %s" % self.classname)
    
@@ -97,7 +97,7 @@ class Main(ResourceCmdHelper):
         except:
             self.main_public_ip = self.public_ips[0]
             self.main_private_ip = self.private_ips[0]
-            self.logger.warn("MONGOD_MAIN_IPS not set")
+            self.logger.warn("MONGODB_MAIN_IPS not set")
 
         if len(self.private_ips) > 1:
             self.private_secondaries = self.private_ips[1:]
