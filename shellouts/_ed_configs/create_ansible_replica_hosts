@@ -114,9 +114,9 @@ class Main(ResourceCmdHelper):
         self.config_file = open(self.config_file_path,"w")
         self.template_dir = "{}/global_templates".format(self.app_dir)
 
-        # stateful_id and stateful_dir
+        # stateful_id 
         self.stateful_id = os.environ.get("STATEFUL_ID")
-        self.stateful_dir = os.environ.get("STATEFUL_DIR")
+        self.share_dir = os.environ.get("SHARE_DIR","/var/tmp/share")
 
         # run_share_dir
         if self.stateful_id:
@@ -238,7 +238,7 @@ class Main(ResourceCmdHelper):
     def _sync_to_share(self):
 
         if not self.run_share_dir: 
-            self.logger.debug("stateful_dir not defined - skipping sync-ing ...")
+            self.logger.debug("run_share_dir not defined - skipping sync-ing ...")
             return
             
         cmds = []
