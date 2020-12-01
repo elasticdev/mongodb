@@ -109,10 +109,20 @@ class Main(ResourceCmdHelper):
         working_subdir = os.environ.get("ANSIBLE_DIR","/var/tmp/ansible")
         if working_subdir[0] == "/": working_subdir = working_subdir[1:]
 
-        self.ansible_dir = "{}/{}".format(self.run_dir,working_subdir)
-        self.config_file_path = "{}/hosts".format(self.ansible_dir)
+        self.app_dir = "{}/{}".format(self.run_dir,working_subdir)
+        self.config_file_path = "{}/hosts".format(self.app_dir)
         self.config_file = open(self.config_file_path,"w")
-        self.template_dir = "{}/global_templates".format(self.ansible_dir)
+        self.template_dir = "{}/global_templates".format(self.app_dir)
+
+        # stateful_id and stateful_dir
+        self.stateful_id = os.environ.get("STATEFUL_ID")
+        self.stateful_dir = os.environ.get("STATEFUL_DIR")
+
+        # run_share_dir
+        if self.stateful_id:
+            self.run_share_dir = os.path.join(self.share_dir,self.stateful_id)
+        else:
+            self.run_share_dir = None
 
     def _write_file(self,key,filepath):
 
@@ -125,19 +135,19 @@ class Main(ResourceCmdHelper):
 
     def _create_mongodb_keyfile(self):
 
-        filepath = os.path.join(self.ansible_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
+        filepath = os.path.join(self.app_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
         self._write_file("mongodb_keyfile",filepath)
         #os.system("chmod 400 {}".format(filepath))
 
     def _create_mongodb_pem(self):
 
-        filepath = os.path.join(self.ansible_dir,"roles","init_replica_nodes","files","mongodb.pem")
+        filepath = os.path.join(self.app_dir,"roles","init_replica_nodes","files","mongodb.pem")
         self._write_file("mongodb_pem",filepath)
         os.system("chmod 400 {}".format(filepath))
         
     def _create_ssh_key(self):
 
-        filepath = "{}/ssh_key.pem".format(self.ansible_dir)
+        filepath = "{}/ssh_key.pem".format(self.app_dir)
         self._write_file("ansible_prv_key",filepath)
         os.system("chmod 400 {}".format(filepath))
         
@@ -194,8 +204,8 @@ class Main(ResourceCmdHelper):
         for _file_stats in list_files(self.template_dir):
 
             template_filepath = _file_stats["file"]
-            file_dir = os.path.join(self.ansible_dir,_file_stats["directory"])
-            file_path = os.path.join(self.ansible_dir,_file_stats["directory"],_file_stats["filename"].split(".ja2")[0])
+            file_dir = os.path.join(self.app_dir,_file_stats["directory"])
+            file_path = os.path.join(self.app_dir,_file_stats["directory"],_file_stats["filename"].split(".ja2")[0])
 
             if not os.path.exists(file_dir): 
                 os.system("mkdir -p {}".format(file_dir))
@@ -225,6 +235,24 @@ class Main(ResourceCmdHelper):
             writefile.write(outputText)
             writefile.close()
         
+    def _sync_to_share(self):
+
+        if not self.run_share_dir: 
+            self.logger.debug("stateful_dir not defined - skipping sync-ing ...")
+            return
+            
+        cmds = []
+        _dirname = os.path.dirname(self.run_share_dir)
+        if not os.path.exists(_dirname): cmds.append("mkdir -p {}".format(_dirname))
+
+        self.logger.debug("rsync -avug {}/ {}".format(self.app_dir,self.run_share_dir))
+        cmds.append("rsync -avug {}/ {}".format(self.app_dir,self.run_share_dir))
+
+        for cmd in cmds:
+            self._execute(cmd,output_to_json=False,exit_error=True)
+
+        self.logger.debug("Sync-ed to run share dir {}".format(self.run_share_dir))
+
     def create(self):
 
         # [public]
@@ -251,8 +279,9 @@ class Main(ResourceCmdHelper):
         self._add_main()
         self._add_secondaries()
         self.config_file.close()
- 
         self.logger.debug("Created Ansible host config file {}".format(self.config_file_path))
+
+        self._sync_to_share()
 
 def usage():
 
