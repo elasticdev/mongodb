@@ -48,7 +48,9 @@ def run(stackargs):
 
     public_ips = []
     private_ips = []
-    for mongodb_host in stack.mongodb_hosts.split(","):
+
+    for mongodb_host in stack.to_list(stack.mongodb_hosts):
+
         _lookup = {"must_exists":True}
         _lookup["resource_type"] = "server"
         _lookup["hostname"] = mongodb_host.strip()
