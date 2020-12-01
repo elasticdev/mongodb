@@ -63,6 +63,7 @@ def run(stackargs):
     env_vars["MONGODB_KEYFILE"] = mongodb_keyfile
     env_vars["MONGODB_PUBLIC_IPS"] = ",".join(public_ips)
     env_vars["MONGODB_PRIVATE_IPS"] = ",".join(private_ips)
+    env_vars["MONGODB_MAIN_IPS"] = ",".join(private_ips)
     env_vars["ANSIBLE_PRV_KEY"] = private_key
     env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
 

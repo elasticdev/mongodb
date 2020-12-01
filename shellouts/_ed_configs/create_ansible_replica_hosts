@@ -104,7 +104,7 @@ class Main(ResourceCmdHelper):
         else:
             self.private_secondaries = None
 
-        self.ansible_build_dir = os.environ.get("ANSIBLE_BUILD_DIR","/var/tmp/build/docker")
+        self.ansible_build_dir = os.environ.get("ANSIBLE_BUILD_DIR","/var/tmp/build/ansible")
         self.config_file_path = "{}/hosts".format(self.ansible_build_dir)
         self.config_file = open(self.config_file_path,"w")
         self.template_dir = "{}/global_templates".format(self.ansible_build_dir)
