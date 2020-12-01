@@ -234,6 +234,10 @@ class Main(ResourceCmdHelper):
             writefile = open(file_path,"wb")
             writefile.write(outputText)
             writefile.close()
+
+    def _execute(self,cmd,output_to_json=False,exit_error=True,**kwargs):
+        return self.execute(cmd,output_to_json=output_to_json,exit_error=exit_error)
+        #return self.execute4(cmd,output_to_json=output_to_json,exit_error=exit_error)
         
     def _sync_to_share(self):
 
