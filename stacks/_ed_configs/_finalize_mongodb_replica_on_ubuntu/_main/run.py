@@ -59,17 +59,25 @@ def run(stackargs):
 
     for mongodb_host in stack.to_list(stack.mongodb_hosts):
 
+        stack.logger.debug("")
+        stack.logger.debug('Looking up mongo host "{}"'.format(mongodb_host))
+        stack.logger.debug("")
+
         _lookup = {"must_exists":True}
         _lookup["resource_type"] = "server"
-        _lookup["hostname"] = mongodb_host.strip()
+        _lookup["hostname"] = mongodb_host
         _host_info = list(stack.get_resource(**_lookup))[0]
-        public_ips.append(_host_info["public_ip"])
-        private_ips.append(_host_info["private_ip"])
+
+        if _host_info["public_ip"] not in public_ips:
+            public_ips.append(_host_info["public_ip"])
+
+        if _host_info["private_ip"] not in private_ips:
+            private_ips.append(_host_info["private_ip"])
 
     # templify ansible and create necessary files
-    env_vars = {"MONGODB_PEM":"'{}'".format(mongodb_pem)}
-    env_vars["MONGODB_KEYFILE"] = "'{}'".format(mongodb_keyfile)
-    env_vars["ANSIBLE_PRV_KEY"] = "'{}'".format(private_key)
+    env_vars = {"MONGODB_PEM":mongodb_pem}
+    env_vars["MONGODB_KEYFILE"] = mongodb_keyfile
+    env_vars["ANSIBLE_PRV_KEY"] = private_key
     env_vars["MONGODB_DB_NAME"] = stack.mongodb_db_name
     env_vars["MONGODB_VERSION"] = stack.mongodb_version
     env_vars["MONGODB_PORT"] = stack.mongodb_port
