@@ -44,6 +44,8 @@ def run(stackargs):
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
     mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    # Testingyoyo
+    mongodb_pem = "\n".join([ _line.strip() for _line in list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"].split("\n") if _line ])
 
     # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":True}
