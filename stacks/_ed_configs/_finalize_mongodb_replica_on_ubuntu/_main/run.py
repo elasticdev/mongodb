@@ -43,9 +43,7 @@ def run(stackargs):
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
-    # Testingyoyo
-    #mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
-    mongodb_pem = "\n".join([ _line.strip() for _line in list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"].split("\n") if _line ])
+    mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
 
     # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":True}
@@ -110,11 +108,6 @@ def run(stackargs):
     # init mongodb
     env_vars = {"USE_DOCKER":True}
     env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
-
-    # Testingyoyo
-    env_vars["MONGODB_PEM"] = "'{}'".format(mongodb_pem)
-    # Testingyoyo
-
     env_vars["stateful_id".upper()] = stack.stateful_id
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
     docker_env_fields_keys = env_vars.keys()
