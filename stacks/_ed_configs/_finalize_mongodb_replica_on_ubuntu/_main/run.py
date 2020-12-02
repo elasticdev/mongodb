@@ -43,9 +43,9 @@ def run(stackargs):
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
-    mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
     # Testingyoyo
-    mongodb_pem = "\n".join([ _line.strip() for _line in list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"].split("\n") if _line ])
+    mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    #mongodb_pem = "\n".join([ _line.strip() for _line in list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"].split("\n") if _line ])
 
     # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":True}
@@ -69,7 +69,9 @@ def run(stackargs):
         private_ips.append(_host_info["private_ip"])
 
     # templify ansible and create necessary files
-    env_vars = {"MONGODB_PEM":mongodb_pem}
+    env_vars = {"MONGODB_PEM":"'{}'".format(mongodb_pem)}
+    env_vars["MONGODB_KEYFILE"] = "'{}'".format(mongodb_keyfile)
+    env_vars["ANSIBLE_PRV_KEY"] = "'{}'".format(private_key)
     env_vars["MONGODB_DB_NAME"] = stack.mongodb_db_name
     env_vars["MONGODB_VERSION"] = stack.mongodb_version
     env_vars["MONGODB_PORT"] = stack.mongodb_port
@@ -77,11 +79,9 @@ def run(stackargs):
     env_vars["MONGODB_STORAGE_ENGINE"] = stack.mongodb_storage_engine
     env_vars["MONGODB_BIND_IP"] = stack.mongodb_bind_ip
     env_vars["MONGODB_LOGPATH"] = stack.mongodb_logpath
-    env_vars["MONGODB_KEYFILE"] = mongodb_keyfile
     env_vars["MONGODB_PUBLIC_IPS"] = ",".join(public_ips)
     env_vars["MONGODB_PRIVATE_IPS"] = ",".join(private_ips)
     env_vars["MONGODB_MAIN_IPS"] = "{},{}".format(public_ips[0],private_ips[0])
-    env_vars["ANSIBLE_PRV_KEY"] = private_key
 
     env_vars["mongodb_username".upper()] = stack.mongodb_username
     env_vars["mongodb_password".upper()] = stack.mongodb_password
@@ -110,6 +110,12 @@ def run(stackargs):
     # init mongodb
     env_vars = {"USE_DOCKER":True}
     env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
+
+    # Testingyoyo
+    env_vars["MONGODB_KEYFILE"] = "'{}'".format(mongodb_keyfile)
+    env_vars["ANSIBLE_PRV_KEY"] = "'{}'".format(private_key)
+    # Testingyoyo
+
     env_vars["stateful_id".upper()] = stack.stateful_id
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
     docker_env_fields_keys = env_vars.keys()
