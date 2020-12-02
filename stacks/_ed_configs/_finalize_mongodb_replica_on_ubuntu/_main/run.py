@@ -57,28 +57,19 @@ def run(stackargs):
     public_ips = []
     private_ips = []
 
+    _lookup = {"must_exists":True,"must_be_one":True}
+    _lookup["resource_type"] = "server"
+
     for mongodb_host in stack.to_list(stack.mongodb_hosts):
 
-        stack.logger.debug("")
-        stack.logger.debug('Looking up mongo host "{}"'.format(mongodb_host))
-        stack.logger.debug("")
-
-        _lookup = {"must_exists":True}
-        _lookup["resource_type"] = "server"
         _lookup["hostname"] = mongodb_host
         _host_info = list(stack.get_resource(**_lookup))[0]
 
-        stack.logger.debug("")
-        stack.logger.debug('Looking up mongo host "{}"'.format(_host_info["public_ip"]))
-        stack.logger.debug("")
+        stack.logger.debug_highlight('mongo hostname {}, found public_ip address "{}"'.format(mongodb_host,
+                                                                                              _host_info["public_ip"]))
 
-        if _host_info["public_ip"] not in public_ips:
-            public_ips.append(_host_info["public_ip"])
-
-        if _host_info["private_ip"] not in private_ips:
-            private_ips.append(_host_info["private_ip"])
-
-    raise 
+        if _host_info["public_ip"] not in public_ips: public_ips.append(_host_info["public_ip"])
+        if _host_info["private_ip"] not in private_ips: private_ips.append(_host_info["private_ip"])
 
     # templify ansible and create necessary files
     env_vars = {"MONGODB_PEM":mongodb_pem}
