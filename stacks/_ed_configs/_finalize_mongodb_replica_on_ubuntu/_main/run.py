@@ -44,8 +44,8 @@ def run(stackargs):
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
     # Testingyoyo
-    mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
-    #mongodb_pem = "\n".join([ _line.strip() for _line in list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"].split("\n") if _line ])
+    #mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    mongodb_pem = "\n".join([ _line.strip() for _line in list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"].split("\n") if _line ])
 
     # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":True}
@@ -112,8 +112,7 @@ def run(stackargs):
     env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
 
     # Testingyoyo
-    env_vars["MONGODB_KEYFILE"] = "'{}'".format(mongodb_keyfile)
-    env_vars["ANSIBLE_PRV_KEY"] = "'{}'".format(private_key)
+    env_vars["MONGODB_PEM"] = "'{}'".format(mongodb_pem)
     # Testingyoyo
 
     env_vars["stateful_id".upper()] = stack.stateful_id
