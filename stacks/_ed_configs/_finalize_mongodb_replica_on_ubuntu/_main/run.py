@@ -68,7 +68,7 @@ def run(stackargs):
         public_ips.append(_host_info["public_ip"])
         private_ips.append(_host_info["private_ip"])
 
-    # Execute execgroup
+    # templify ansible and create necessary files
     env_vars = {"MONGODB_PEM":mongodb_pem}
     env_vars["MONGODB_DB_NAME"] = stack.mongodb_db_name
     env_vars["MONGODB_VERSION"] = stack.mongodb_version
@@ -82,7 +82,6 @@ def run(stackargs):
     env_vars["MONGODB_PRIVATE_IPS"] = ",".join(private_ips)
     env_vars["MONGODB_MAIN_IPS"] = "{},{}".format(public_ips[0],private_ips[0])
     env_vars["ANSIBLE_PRV_KEY"] = private_key
-    env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
 
     env_vars["mongodb_username".upper()] = stack.mongodb_username
     env_vars["mongodb_password".upper()] = stack.mongodb_password
@@ -98,29 +97,28 @@ def run(stackargs):
                           "mongodb_password".upper() ]
 
     env_vars["ED_TEMPLATE_VARS"] = ",".join(_ed_template_vars)
-
-    env_vars["stateful_id".upper()] = stack.stateful_id
-    env_vars["docker_exec_env".upper()] = stack.docker_exec_env
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
     env_vars["METHOD"] = "create"
-    env_vars["USE_DOCKER"] = True
-    env_vars["CLOBBER"] = True
-
-    docker_env_fields_keys = env_vars.keys()
-    docker_env_fields_keys.remove("METHOD")
-
-    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
 
     inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["name"] = stack.mongodb_cluster
     inputargs["stateful_id"] = stack.stateful_id
     inputargs["human_description"] = "Setting up Ansible for MongoDb"
-
-    # setup
     stack.ubuntu_vendor_setup.insert(**inputargs)
 
     # init mongodb
+    env_vars = {"USE_DOCKER":True}
+    env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
+    env_vars["stateful_id".upper()] = stack.stateful_id
+    env_vars["docker_exec_env".upper()] = stack.docker_exec_env
+    docker_env_fields_keys = env_vars.keys()
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    inputargs = {"display":True}
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["name"] = stack.mongodb_cluster
+    inputargs["stateful_id"] = stack.stateful_id
     inputargs["human_description"] = "Executing init MongoDB {} with Ansible".format(stack.mongodb_cluster)
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
