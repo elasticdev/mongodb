@@ -9,12 +9,19 @@ def run(stackargs):
     stack.parse.add_required(key="mongodb_hosts")
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="ssh_keyname")
+    stack.parse.add_required(key="stateful_id",default="_random")
 
     stack.parse.add_optional(key="mongodb_username",default="_random")
     stack.parse.add_optional(key="mongodb_password",default="_random")
     stack.parse.add_optional(key="vm_username",default="ubuntu")
+    stack.parse.add_optional(key="mongodb_data_dir",default="/var/lib/mongodb")
+    stack.parse.add_optional(key="mongodb_db_name",default="mymongodb")
+    stack.parse.add_optional(key="mongodb_storage_engine",default="wiredTiger")
+    stack.parse.add_optional(key="mongodb_version",default="4.0.3")
+    stack.parse.add_optional(key="mongodb_port",default="27017")
+    stack.parse.add_optional(key="mongodb_bind_ip",default="0.0.0.0")
+    stack.parse.add_optional(key="mongodb_logpath",default="/var/log/mongodb/mongod.log")
 
-    stack.parse.add_required(key="stateful_id",default="_random")
     stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
 
     # Add Execution Group
@@ -60,6 +67,13 @@ def run(stackargs):
 
     # Execute execgroup
     env_vars = {"MONGODB_PEM":mongodb_pem}
+    env_vars["MONGODB_DB_NAME"] = stack.mongodb_db_name
+    env_vars["MONGODB_VERSION"] = stack.mongodb_version
+    env_vars["MONGODB_PORT"] = stack.mongodb_port
+    env_vars["MONGODB_DATA_DIR"] = stack.mongodb_data_dir
+    env_vars["MONGODB_STORAGE_ENGINE"] = stack.mongodb_storage_engine
+    env_vars["MONGODB_BIND_IP"] = stack.mongodb_bind_ip
+    env_vars["MONGODB_LOGPATH"] = stack.mongodb_logpath
     env_vars["MONGODB_KEYFILE"] = mongodb_keyfile
     env_vars["MONGODB_PUBLIC_IPS"] = ",".join(public_ips)
     env_vars["MONGODB_PRIVATE_IPS"] = ",".join(private_ips)
@@ -69,7 +83,18 @@ def run(stackargs):
 
     env_vars["mongodb_username".upper()] = stack.mongodb_username
     env_vars["mongodb_password".upper()] = stack.mongodb_password
-    env_vars["ED_TEMPLATE_VARS"] = "{},{}".format("mongodb_username".upper(),"mongodb_password".upper())
+
+    _ed_template_vars = [ "MONGODB_DB_NAME",
+                          "MONGODB_VERSION",
+                          "MONGODB_PORT",
+                          "MONGODB_DATA_DIR",
+                          "MONGODB_STORAGE_ENGINE",
+                          "MONGODB_BIND_IP",
+                          "MONGODB_LOGPATH",
+                          "mongodb_username".upper(),
+                          "mongodb_password".upper() ]
+
+    env_vars["ED_TEMPLATE_VARS"] = ",".join(_ed_template_vars)
 
     env_vars["stateful_id".upper()] = stack.stateful_id
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
