@@ -25,7 +25,8 @@ def run(stackargs):
     stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
 
     # Add Execution Group
-    stack.add_execgroup("elasticdev:::mongodb::ubuntu_vendor")
+    stack.add_execgroup("elasticdev:::mongodb::ubuntu_vendor_setup")
+    stack.add_execgroup("elasticdev:::mongodb::ubuntu_vendor_init_replica")
 
     # Initialize 
     stack.init_variables()
@@ -112,7 +113,13 @@ def run(stackargs):
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["name"] = stack.mongodb_cluster
     inputargs["stateful_id"] = stack.stateful_id
-    inputargs["human_description"] = "Creating MongoDB Replica set {}".format(stack.mongodb_cluster)
-    stack.ubuntu_vendor.insert(**inputargs)
+    inputargs["human_description"] = "Setting up Ansible for MongoDb"
+
+    # setup
+    stack.ubuntu_vendor_setup.insert(**inputargs)
+
+    # init mongodb
+    inputargs["human_description"] = "Executing init MongoDB {} with Ansible".format(stack.mongodb_cluster)
+    stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
     return stack.get_results()
