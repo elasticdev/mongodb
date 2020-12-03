@@ -188,14 +188,25 @@ class Main(ResourceCmdHelper):
 
         self.config_file.write("\n")
 
+    def _get_template_vars(self):
+
+        if os.environ.get("ED_TEMPLATE_VARS"):
+            return [ _var.strip() for _var in os.environ.get("ED_TEMPLATE_VARS").split(",") ]
+
+        if os.environ.get("ANSIBLE_TEMPLATE_VARS"):
+            return [ _var.strip() for _var in os.environ.get("ANSIBLE_TEMPLATE_VARS").split(",") ]
+
+        # get template_vars from "ANS_VAR_<var>"
+        _template_vars = []
+        for _var in os.environ.keys():
+            if "ANS_VAR" not in _var: continue
+            _template_vars.append(_var)
+
+        return _template_vars
+
     def _templify(self,**kwargs):
 
-        if not os.environ.get("ED_TEMPLATE_VARS"):
-            self.logger.warn("ED_TEMPLATE_VARS not set - skipping templating")
-            #os.chdir(self.run_dir)
-            return
-
-        _template_vars = [ _var.strip() for _var in os.environ.get("ED_TEMPLATE_VARS").split(",") ]
+        _template_vars = self._get_template_vars()
 
         if not _template_vars:
             self.logger.warn("ED_TEMPLATE_VARS not set - skipping templating")
