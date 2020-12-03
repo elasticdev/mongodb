@@ -326,7 +326,7 @@ if __name__ == '__main__':
                      "method",
                      "run_id" ]
 
-    main.set_inputargs(set_env_vars=set_env_vars)
+    main.set_inputargs(set_env_vars=set_env_vars,upper_case=True)
    
     method = main.inputargs.get("method","create")
 
