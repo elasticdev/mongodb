@@ -12,6 +12,10 @@ def run(stackargs):
     stack.parse.add_optional(key="mongodb_password",default="null")
     stack.parse.add_optional(key="vm_username",default="null")
 
+    # We will enable random suffix to add to the hostname
+    stack.parse.add_optional(key="hostname_random",default="null")
+
+
     # Testingyoyo
     #stack.parse.add_required(key="image")
     #stack.parse.add_required(key="aws_default_region",default="us-east-1")
@@ -41,9 +45,15 @@ def run(stackargs):
 
     mongodb_hosts = []
 
+    if stack.hostname_random:
+        hostname_base = "{}-replica-{}".format(stack.mongodb_cluster,stack.random_id(size=3))
+
+    else:
+        hostname_base = "{}-replica".format(stack.mongodb_cluster)
+
     for num in range(int(stack.num_of_replicas)):
 
-        hostname = "{}-replica-num-{}".format(stack.mongodb_cluster,num).replace("_","-")
+        hostname = "{}-num-{}".format(hostname_base,num).replace("_","-")
         mongodb_hosts.append(hostname)
 
         default_values = {"hostname":hostname}
