@@ -110,19 +110,51 @@ def run(stackargs):
     inputargs["human_description"] = "Setting up Ansible for MongoDb"
     stack.ubuntu_vendor_setup.insert(**inputargs)
 
-    # init mongodb
     env_vars = {"USE_DOCKER":True}
-    env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
     env_vars["stateful_id".upper()] = stack.stateful_id
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
-    docker_env_fields_keys = env_vars.keys()
-    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
 
     inputargs = {"display":True}
-    inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["name"] = stack.mongodb_cluster
     inputargs["stateful_id"] = stack.stateful_id
-    inputargs["human_description"] = "Executing init MongoDB {} with Ansible".format(stack.mongodb_cluster)
+
+    # install python
+    env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml"
+    docker_env_fields_keys = env_vars.keys()
+
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = "Installing python to mongodb nodes"
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
+
+    # mongo install and setup
+    env_vars["ANSIBLE_EXEC_YMLS"] = "mongo-setup.yml"
+    docker_env_fields_keys = env_vars.keys()
+
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = "Install and setup on mongodb nodes"
+    stack.ubuntu_vendor_init_replica.insert(**inputargs)
+
+    # mongo init replica
+    env_vars["ANSIBLE_EXEC_YMLS"] = "mongo-init-replica.yml"
+    docker_env_fields_keys = env_vars.keys()
+
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = "Initialize replication on master mongodb node"
+    stack.ubuntu_vendor_init_replica.insert(**inputargs)
+
+    # add slave replica nodes
+    env_vars["ANSIBLE_EXEC_YMLS"] = "mongo-add-slave-replica.yml"
+    docker_env_fields_keys = env_vars.keys()
+
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = "Add slave nodes to the master mongodb node"
+    stack.ubuntu_vendor_init_replica.insert(**inputargs)
+
+    #env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
+    #inputargs["human_description"] = "Executing init MongoDB {} with Ansible".format(stack.mongodb_cluster)
 
     return stack.get_results()
