@@ -46,7 +46,7 @@ def run(stackargs):
     mongodb_hosts = []
 
     if stack.hostname_random:
-        hostname_base = "{}-replica-{}".format(stack.mongodb_cluster,stack.random_id(size=3))
+        hostname_base = "{}-replica-{}".format(stack.mongodb_cluster,stack.random_id(size=3).lower())
 
     else:
         hostname_base = "{}-replica".format(stack.mongodb_cluster)
