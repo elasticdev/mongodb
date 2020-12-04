@@ -12,7 +12,7 @@ def run(stackargs):
     stack.parse.add_required(key="stateful_id",default="_random")
 
     # This will be public_main/private_main
-    stack.parse.add_optional(key="master_env",choices=["public_main","private_main"],default="public_main")
+    stack.parse.add_required(key="mongodb_master_network",choices=["public_main","private_main"],default="public_main")
 
     stack.parse.add_optional(key="mongodb_username",default="_random")
     stack.parse.add_optional(key="mongodb_password",default="_random")
@@ -88,7 +88,7 @@ def run(stackargs):
     env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
     env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
     env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
-    env_vars["ANS_VAR_master_env"] = stack.master_env
+    env_vars["ANS_VAR_mongodb_master_network"] = stack.mongodb_master_network
     env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
     env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
     env_vars["METHOD"] = "create"
