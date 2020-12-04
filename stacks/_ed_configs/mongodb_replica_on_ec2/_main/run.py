@@ -49,19 +49,6 @@ def run(stackargs):
     stack.init_variables()
     stack.init_substacks()
 
-    # Testingyoyo
-    stack.logger.debug('a1'*32)
-    stack.logger.debug('a1'*32)
-    stack.logger.debug('a1'*32)
-    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
-    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
-    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
-    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
-    stack.logger.debug('a2'*32)
-    stack.logger.debug('a2'*32)
-    stack.logger.debug('a2'*32)
-    raise
-
     stack.set_parallel()
 
     mongodb_hosts = []
