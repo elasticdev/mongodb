@@ -12,7 +12,9 @@ def run(stackargs):
     stack.parse.add_required(key="stateful_id",default="_random")
 
     # This will be public_main/private_main
-    stack.parse.add_required(key="mongodb_master_network",choices=["public_main","private_main"],default="public_main")
+    # Testingyoyo
+    #stack.parse.add_required(key="mongodb_master_network",choices=["public_main","private_main"],default="public_main")
+    stack.parse.add_required(key="mongodb_master_network",default="public_main")
 
     stack.parse.add_optional(key="mongodb_username",default="_random")
     stack.parse.add_optional(key="mongodb_password",default="_random")
