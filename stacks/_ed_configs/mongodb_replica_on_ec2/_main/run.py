@@ -15,7 +15,6 @@ def run(stackargs):
     # We will enable random suffix to add to the hostname
     stack.parse.add_optional(key="hostname_random",default="null")
 
-
     # Testingyoyo
     #stack.parse.add_required(key="image")
     #stack.parse.add_required(key="aws_default_region",default="us-east-1")
@@ -32,6 +31,12 @@ def run(stackargs):
 
     stack.parse.add_optional(key="tags",default="null")
     stack.parse.add_optional(key="labels",default="null")
+
+    # extra disk
+    stack.parse.add_optional(key="volume_name",default="null")
+    stack.parse.add_optional(key="volume_size",default="null")
+    stack.parse.add_optional(key="volume_mntpt",default="/var/lib/mongodb")
+    stack.parse.add_optional(key="volume_fstype",default="xfs")
 
     # Add substack
     stack.add_substack('elasticdev:::ec2_ubuntu')
@@ -66,6 +71,12 @@ def run(stackargs):
         default_values["size"] = stack.size
         default_values["disksize"] = stack.disksize
         default_values["register_to_ed"] = None
+
+        # extra disk
+        if stack.volume_size: default_values["volume_size"] = stack.volume_size
+        if stack.volume_name: default_values["volume_name"] = stack.volume_name
+        if stack.volume_mntpt: default_values["volume_mntpt"] = stack.volume_mntpt
+        if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
 
         inputargs = {"default_values":default_values}
         human_description = "Creating hostname {} on ec2".format(hostname)
