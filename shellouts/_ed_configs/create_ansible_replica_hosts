@@ -103,6 +103,17 @@ class Main(ResourceCmdHelper):
         for _key,_value in self.inputargs.iteritems():
             if "ANS_VAR_" not in _key: continue
             _mapped_key = _key.split("ANS_VAR_")[-1]
+            # Testingyoyo
+            self.logger.debug("")
+            self.logger.debug("")
+            self.logger.debug("")
+            self.logger.debug("mapped key {} value {}".format(_key,_value))
+            self.logger.debug("mapped key {} value {}".format(_key,_value))
+            self.logger.debug("mapped key {} value {}".format(_key,_value))
+            self.logger.debug("mapped key {} value {}".format(_key,_value))
+            self.logger.debug("")
+            self.logger.debug("")
+            self.logger.debug("")
             self.inputargs[_mapped_key] = _value
             del self.inputargs[_key]
 
