@@ -1,14 +1,14 @@
 ---
 os_user: ubuntu
-mongodb_admin_user: {{ MONGODB_USERNAME }}
-mongodb_admin_pass: {{ MONGODB_PASSWORD }}
-mongodb_dbpath: {{ MONGODB_DATA_DIR }}
-mongodb_storage_engine: {{ MONGODB_STORAGE_ENGINE }}
-mongodb_name: {{ MONGODB_DB_NAME }}
-mongodb_version: {{ MONGODB_VERSION }}
-mongodb_port: {{ MONGODB_PORT }}
-mongodb_bind_ip: {{ MONGODB_BIND_IP }}
-mongodb_logpath: {{ MONGODB_LOGPATH }}
+mongodb_admin_user: {{ mongodb_username }}
+mongodb_admin_pass: {{ mongodb_password }}
+mongodb_dbpath: {{ mongodb_data_dir }}
+mongodb_storage_engine: {{ mongodb_storage_engine }}
+mongodb_name: {{ mongodb_db_name }}
+mongodb_version: {{ mongodb_version }}
+mongodb_port: {{ mongodb_port }}
+mongodb_bind_ip: {{ mongodb_bind_ip }}
+mongodb_logpath: {{ mongodb_logpath }}
 mongodb_security_path: /etc/mongodb/security
 mongodb_keyfile_path: /etc/mongodb/security/mongodb_keyfile
 mongodb_pem_path: /etc/mongodb/security/mongo.pem

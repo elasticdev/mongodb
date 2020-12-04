@@ -54,7 +54,6 @@ def list_files(rootdir,ignores=[ ".pyc$", ".swp$"],split_dir="global_templates")
             base_files.extend(tempList)
 
     # categorize files
-
     fileList = []
 
     for _file in base_files:
@@ -83,8 +82,33 @@ class Main(ResourceCmdHelper):
         self.classname = 'MONGODB_ANSIBLE_HELPER'
         self.logger = ElasticDevLogger(self.classname,logcategory="cloudprovider")
         self.logger.debug("Instantiating %s" % self.classname)
-   
+
+        set_env_vars = [ "JOB_INSTANCE_ID",
+                         "SCHEDULE_ID",
+                         "RUN_ID",
+                         "ANS_VAR_private_key",
+                         "ANSIBLE_DIR",
+                         "ANS_VAR_mongodb_keyfile",
+                         "ANS_VAR_mongodb_pem",
+                         "ANS_VAR_mongodb_main_ips",
+                         "ANS_VAR_mongodb_public_ips",
+                         "ANS_VAR_mongodb_private_ips",
+                         "method" ]
+
+        self.set_inputargs(set_env_vars=set_env_vars,upper_case=None)
+        self._re_map_ansible_vars()
+
+    def _re_map_ansible_vars(self):
+
+        for _key,_value in self.inputargs.iteritems():
+            if "ANS_VAR_" not in _key: continue
+            _mapped_key = _key.split("ANS_VAR_")[-1]
+            self.inputargs[_mapped_key] = _value
+            del self.inputargs[_key]
+
     def _set_vars(self):
+
+        # re-mapped variables from ANSIBLE without prefixes
 
         self.public_ips = self.inputargs["mongodb_public_ips"].split(",")
         self.private_ips = self.inputargs["mongodb_private_ips"].split(",")
@@ -93,11 +117,11 @@ class Main(ResourceCmdHelper):
         if self.clobber in [ "None", None, 'none' ]: self.clobber = None
         
         try:
-            self.main_public_ip,self.main_private_ip = os.environ.get("MONGODB_MAIN_IPS").split(",")
+            self.main_public_ip,self.main_private_ip = self.inputargs["mongodb_main_ips"].split(",")
         except:
             self.main_public_ip = self.public_ips[0]
             self.main_private_ip = self.private_ips[0]
-            self.logger.warn("MONGODB_MAIN_IPS not set")
+            self.logger.warn("ANS_VAR_/mongodb_main_ips not set")
 
         if len(self.private_ips) > 1:
             self.private_secondaries = self.private_ips[1:]
@@ -106,7 +130,7 @@ class Main(ResourceCmdHelper):
 
         self.run_dir = os.getcwd()
 
-        working_subdir = os.environ.get("ANSIBLE_DIR","/var/tmp/ansible")
+        working_subdir = self.inputargs.get("ansible_dir","/var/tmp/ansible")
         if working_subdir[0] == "/": working_subdir = working_subdir[1:]
 
         self.app_dir = "{}/{}".format(self.run_dir,working_subdir)
@@ -148,7 +172,7 @@ class Main(ResourceCmdHelper):
     def _create_ssh_key(self):
 
         filepath = "{}/ssh_key.pem".format(self.app_dir)
-        self._write_file("ansible_prv_key",filepath)
+        self._write_file("private_key",filepath)
         os.system("chmod 400 {}".format(filepath))
         
     def _add_public(self):
@@ -310,10 +334,17 @@ script + json_input (as argument)
 environmental variables:
 
     create:
-        MONGODB_PUBLIC_IPS
-        MONGODB_PRIVATE_IPS
-        JOB_INSTANCE_ID (optional)
-        SCHEDULE_ID (optional)
+        JOB_INSTANCE_ID
+        SCHEDULE_ID
+        RUN_ID
+        ANS_VAR_private_key
+        ANSIBLE_DIR
+        ANS_VAR_mongodb_keyfile
+        ANS_VAR_mongodb_pem
+        ANS_VAR_mongodb_main_ips
+        ANS_VAR_mongodb_public_ips
+        ANS_VAR_mongodb_private_ips
+        method
 
        """
     exit(4)
@@ -327,26 +358,12 @@ if __name__ == '__main__':
 
     main = Main()
 
-    set_env_vars = [ "job_instance_id",
-                     "schedule_id",
-                     "ansible_prv_key",
-                     "mongodb_keyfile",
-                     "mongodb_pem",
-                     "mongodb_public_ips",
-                     "mongodb_private_ips",
-                     "method",
-                     "run_id" ]
-
-    main.set_inputargs(set_env_vars=set_env_vars,upper_case=True)
-   
-    method = main.inputargs.get("method","create")
-
-    if method == "create":
+    if main.inputargs.get("method","create") == "create":
 
         main.check_required_inputargs(keys=["mongodb_public_ips","mongodb_private_ips"])
         main.create()
 
     else:
         usage()
-        print 'method "{}" not supported!'.format(method)
+        print 'method "{}" not supported!'.format(main.inputargs.get("method","create"))
         exit(4)

@@ -72,34 +72,36 @@ def run(stackargs):
         if _host_info["private_ip"] not in private_ips: private_ips.append(_host_info["private_ip"])
 
     # templify ansible and create necessary files
-    env_vars = {"MONGODB_PEM":mongodb_pem}
-    env_vars["MONGODB_KEYFILE"] = mongodb_keyfile
-    env_vars["ANSIBLE_PRV_KEY"] = private_key
-    env_vars["MONGODB_DB_NAME"] = stack.mongodb_db_name
-    env_vars["MONGODB_VERSION"] = stack.mongodb_version
-    env_vars["MONGODB_PORT"] = stack.mongodb_port
-    env_vars["MONGODB_DATA_DIR"] = stack.mongodb_data_dir
-    env_vars["MONGODB_STORAGE_ENGINE"] = stack.mongodb_storage_engine
-    env_vars["MONGODB_BIND_IP"] = stack.mongodb_bind_ip
-    env_vars["MONGODB_LOGPATH"] = stack.mongodb_logpath
-    env_vars["MONGODB_PUBLIC_IPS"] = ",".join(public_ips)
-    env_vars["MONGODB_PRIVATE_IPS"] = ",".join(private_ips)
-    env_vars["MONGODB_MAIN_IPS"] = "{},{}".format(public_ips[0],private_ips[0])
+    env_vars = {"ANS_VAR_mongodb_pem":mongodb_pem}
+    env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
+    env_vars["ANS_VAR_private_key"] = private_key
+    env_vars["ANS_VAR_mongodb_db_name"] = stack.mongodb_db_name
+    env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
+    env_vars["ANS_VAR_mongodb_port"] = stack.mongodb_port
+    env_vars["ANS_VAR_mongodb_data_dir"] = stack.mongodb_data_dir
+    env_vars["ANS_VAR_mongodb_storage_engine"] = stack.mongodb_storage_engine
+    env_vars["ANS_VAR_mongodb_bind_ip"] = stack.mongodb_bind_ip
+    env_vars["ANS_VAR_mongodb_logpath"] = stack.mongodb_logpath
+    env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
+    env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
+    env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
+    env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
+    env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
 
-    env_vars["mongodb_username".upper()] = stack.mongodb_username
-    env_vars["mongodb_password".upper()] = stack.mongodb_password
+    # Testingyoyo
+    # remove this after testing
+    #_ed_template_vars = [ "ANS_VAR_mongodb_db_name",
+    #                      "ANS_VAR_mongodb_version",
+    #                      "ANS_VAR_mongodb_port",
+    #                      "ANS_VAR_mongodb_data_dir",
+    #                      "ANS_VAR_mongodb_storage_engine",
+    #                      "ANS_VAR_mongodb_bind_ip",
+    #                      "ANS_VAR_mongodb_logpath",
+    #                      "ANS_VAR_mongodb_username",
+    #                      "ANS_VAR_mongodb_password" ]
 
-    _ed_template_vars = [ "MONGODB_DB_NAME",
-                          "MONGODB_VERSION",
-                          "MONGODB_PORT",
-                          "MONGODB_DATA_DIR",
-                          "MONGODB_STORAGE_ENGINE",
-                          "MONGODB_BIND_IP",
-                          "MONGODB_LOGPATH",
-                          "mongodb_username".upper(),
-                          "mongodb_password".upper() ]
+    #env_vars["ED_TEMPLATE_VARS"] = ",".join(_ed_template_vars)
 
-    env_vars["ED_TEMPLATE_VARS"] = ",".join(_ed_template_vars)
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
     env_vars["METHOD"] = "create"
 
@@ -119,7 +121,7 @@ def run(stackargs):
     inputargs["stateful_id"] = stack.stateful_id
 
     # install python
-    env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml"
+    env_vars["ANS_VAR_exec_ymls"] = "install-python.yml"
     docker_env_fields_keys = env_vars.keys()
 
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -128,7 +130,7 @@ def run(stackargs):
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
     # mongo install and setup
-    env_vars["ANSIBLE_EXEC_YMLS"] = "mongo-setup.yml"
+    env_vars["ANS_VAR_exec_ymls"] = "mongo-setup.yml"
     docker_env_fields_keys = env_vars.keys()
 
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -137,7 +139,7 @@ def run(stackargs):
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
     # mongo init replica
-    env_vars["ANSIBLE_EXEC_YMLS"] = "mongo-init-replica.yml"
+    env_vars["ANS_VAR_exec_ymls"] = "mongo-init-replica.yml"
     docker_env_fields_keys = env_vars.keys()
 
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -146,7 +148,7 @@ def run(stackargs):
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
     # add slave replica nodes
-    env_vars["ANSIBLE_EXEC_YMLS"] = "mongo-add-slave-replica.yml"
+    env_vars["ANS_VAR_exec_ymls"] = "mongo-add-slave-replica.yml"
     docker_env_fields_keys = env_vars.keys()
 
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -155,7 +157,7 @@ def run(stackargs):
 
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
-    #env_vars["ANSIBLE_EXEC_YMLS"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
+    #env_vars["ANS_VAR_exec_ymls"] = "install-python.yml,mongo-setup.yml,mongo-init-replica.yml,mongo-add-slave-replica.yml"
     #inputargs["human_description"] = "Executing init MongoDB {} with Ansible".format(stack.mongodb_cluster)
 
     return stack.get_results()
