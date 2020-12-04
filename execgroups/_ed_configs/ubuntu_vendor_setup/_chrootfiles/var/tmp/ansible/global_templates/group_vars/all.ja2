@@ -1,5 +1,6 @@
 ---
 os_user: ubuntu
+master_env: {{ master_env }}
 mongodb_admin_user: {{ mongodb_username }}
 mongodb_admin_pass: {{ mongodb_password }}
 mongodb_dbpath: {{ mongodb_data_dir }}

@@ -11,6 +11,9 @@ def run(stackargs):
     stack.parse.add_required(key="ssh_keyname")
     stack.parse.add_required(key="stateful_id",default="_random")
 
+    # This will be public_main/private_main
+    stack.parse.add_optional(key="master_env",choices=["public_main","private_main"],default="public_main")
+
     stack.parse.add_optional(key="mongodb_username",default="_random")
     stack.parse.add_optional(key="mongodb_password",default="_random")
     stack.parse.add_optional(key="vm_username",default="ubuntu")
@@ -85,25 +88,13 @@ def run(stackargs):
     env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
     env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
     env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
+    env_vars["ANS_VAR_master_env"] = stack.master_env
     env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
     env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
-
-    # Testingyoyo
-    # remove this after testing
-    #_ed_template_vars = [ "ANS_VAR_mongodb_db_name",
-    #                      "ANS_VAR_mongodb_version",
-    #                      "ANS_VAR_mongodb_port",
-    #                      "ANS_VAR_mongodb_data_dir",
-    #                      "ANS_VAR_mongodb_storage_engine",
-    #                      "ANS_VAR_mongodb_bind_ip",
-    #                      "ANS_VAR_mongodb_logpath",
-    #                      "ANS_VAR_mongodb_username",
-    #                      "ANS_VAR_mongodb_password" ]
-
-    #env_vars["ED_TEMPLATE_VARS"] = ",".join(_ed_template_vars)
-
-    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
     env_vars["METHOD"] = "create"
+
+    # This is the default, but choose to be explicit
+    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
 
     inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
