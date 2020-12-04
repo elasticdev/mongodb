@@ -9,8 +9,7 @@ def run(stackargs):
     stack.parse.add_required(key="ssh_keyname")
 
     # This will be public_main/private_main
-    #stack.parse.add_required(key="mongodb_master_network",choices=["public_main","private_main"],default="public_main")
-    stack.parse.add_required(key="mongodb_master_network",default="public_main")
+    stack.parse.add_optional(key="mongodb_master_network",choices=["public_main","private_main"],default="public_main")
 
     stack.parse.add_optional(key="mongodb_username",default="null")
     stack.parse.add_optional(key="mongodb_password",default="null")
@@ -49,6 +48,19 @@ def run(stackargs):
     # Initialize 
     stack.init_variables()
     stack.init_substacks()
+
+    # Testingyoyo
+    stack.logger.debug('a1'*32)
+    stack.logger.debug('a1'*32)
+    stack.logger.debug('a1'*32)
+    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
+    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
+    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
+    stack.logger.debug("master_network {}".format(stack.mongodb_master_network))
+    stack.logger.debug('a2'*32)
+    stack.logger.debug('a2'*32)
+    stack.logger.debug('a2'*32)
+    raise
 
     stack.set_parallel()
 
