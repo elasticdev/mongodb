@@ -103,6 +103,19 @@ class Main(ResourceCmdHelper):
 
     def _re_map_ansible_vars(self):
 
+        self.logger.debug("-"*32)
+        self.logger.debug("")
+        self.logger.debug("")
+        print self.inputargs
+        self.logger.debug("")
+        self.logger.debug("")
+        self.logger.debug(self.inputargs)
+        self.logger.debug("")
+        self.logger.debug("")
+        self.logger.debug("-"*32)
+        self.logger.debug("-"*32)
+        raise
+
         for _key,_value in self.inputargs.iteritems():
             if "ANS_VAR_" not in _key: continue
             _mapped_key = _key.split("ANS_VAR_")[-1]
