@@ -18,11 +18,11 @@
 
 import os
 import sys
-import jinja2
+#import jinja2
 
 from ed_helper_publisher.loggerly import ElasticDevLogger
 from ed_helper_publisher.resource_manage import ResourceCmdHelper
-from ed_helper_publisher.templating import list_template_files
+#from ed_helper_publisher.templating import list_template_files
 
 class Main(ResourceCmdHelper):
 
