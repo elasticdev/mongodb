@@ -1,7 +1,7 @@
 ---
 - name: Start Replicaset
   hosts: 
-    - "{{ mongodb_master_network }}"
+    - config_network
   remote_user: "{{ os_user }}"
   become: yes
   become_method: sudo

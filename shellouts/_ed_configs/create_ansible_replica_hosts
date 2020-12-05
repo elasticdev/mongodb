@@ -91,6 +91,7 @@ class Main(ResourceCmdHelper):
                          "ANS_VAR_mongodb_keyfile",
                          "ANS_VAR_mongodb_pem",
                          "ANS_VAR_mongodb_main_ips",
+                         "ANS_VAR_mongodb_config_network",
                          "ANS_VAR_mongodb_public_ips",
                          "ANS_VAR_mongodb_private_ips",
                          "method" ]
@@ -113,6 +114,7 @@ class Main(ResourceCmdHelper):
 
         self.public_ips = self.inputargs["mongodb_public_ips"].split(",")
         self.private_ips = self.inputargs["mongodb_private_ips"].split(",")
+        self.config_network = self.inputargs["config_network"]
 
         self.clobber = self.inputargs.get("clobber",True)
         if self.clobber in [ "None", None, 'none' ]: self.clobber = None
@@ -185,6 +187,13 @@ class Main(ResourceCmdHelper):
             self.config_file.write(_ip)
             self.config_file.write("\n")
 
+        self.config_file.write("\n")
+
+    def _add_config_network(self):
+
+        self.config_file.write('[config_network]')
+        self.config_file.write("\n")
+        self.config_file.write(self.config_network)
         self.config_file.write("\n")
 
     def _add_main(self):
@@ -322,6 +331,7 @@ class Main(ResourceCmdHelper):
         self._create_mongodb_keyfile()
         self._create_mongodb_pem()
         self._add_public()
+        self._add_config_network()
         self._add_main()
         self._add_secondaries()
         self.config_file.close()

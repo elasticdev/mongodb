@@ -9,7 +9,7 @@ def run(stackargs):
     stack.parse.add_required(key="ssh_keyname")
 
     # This will be public_main/private_main
-    stack.parse.add_optional(key="mongodb_master_network",choices=["public_main","private_main"],default="public_main")
+    stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
 
     stack.parse.add_optional(key="mongodb_username",default="null")
     stack.parse.add_optional(key="mongodb_password",default="null")
@@ -94,7 +94,7 @@ def run(stackargs):
     default_values = {"mongodb_cluster":stack.mongodb_cluster}
     default_values["ssh_keyname"] = stack.ssh_keyname
     default_values["mongodb_hosts"] = mongodb_hosts
-    default_values["mongodb_master_network"] = stack.mongodb_master_network
+    default_values["config_network"] = stack.config_network
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
     if stack.vm_username: default_values["vm_username"] = stack.vm_username

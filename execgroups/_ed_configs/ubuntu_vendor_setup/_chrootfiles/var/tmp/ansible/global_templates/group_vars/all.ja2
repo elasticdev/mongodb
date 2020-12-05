@@ -1,6 +1,5 @@
 ---
 os_user: ubuntu
-mongodb_master_network: {{ mongodb_master_network }}
 mongodb_admin_user: {{ mongodb_username }}
 mongodb_admin_pass: {{ mongodb_password }}
 mongodb_dbpath: {{ mongodb_data_dir }}
