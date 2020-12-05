@@ -89,7 +89,7 @@ class Main(ResourceCmdHelper):
         self.app_dir = "{}/{}".format(self.run_dir,working_subdir)
         self.config_file_path = "{}/hosts".format(self.app_dir)
         self.config_file = open(self.config_file_path,"w")
-        self.template_dir = "{}/ed_templates".format(self.app_dir)
+        self.template_dir = "{}/_ed_templates".format(self.app_dir)
 
         # stateful_id 
         self.stateful_id = os.environ.get("STATEFUL_ID")
