@@ -114,7 +114,7 @@ class Main(ResourceCmdHelper):
 
         self.public_ips = self.inputargs["mongodb_public_ips"].split(",")
         self.private_ips = self.inputargs["mongodb_private_ips"].split(",")
-        self.config_network = self.inputargs["config_network"]
+        self.config_network = self.inputargs["mongodb_config_network"]
 
         self.clobber = self.inputargs.get("clobber",True)
         if self.clobber in [ "None", None, 'none' ]: self.clobber = None
@@ -359,6 +359,7 @@ environmental variables:
         ANS_VAR_mongodb_keyfile
         ANS_VAR_mongodb_pem
         ANS_VAR_mongodb_main_ips
+        ANS_VAR_mongodb_config_network
         ANS_VAR_mongodb_public_ips
         ANS_VAR_mongodb_private_ips
         method

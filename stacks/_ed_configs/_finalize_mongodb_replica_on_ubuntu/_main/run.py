@@ -92,9 +92,9 @@ def run(stackargs):
     env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
 
     if stack.config_network == "private":
-        env_vars["ANS_VAR_config_network"] = private_ips[0]
+        env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
     else:
-        env_vars["ANS_VAR_config_network"] = public_ips[0]
+        env_vars["ANS_VAR_mongodb_config_network"] = public_ips[0]
 
     env_vars["METHOD"] = "create"
 
