@@ -196,7 +196,10 @@ class Main(ResourceCmdHelper):
             self.logger.warn("ED_TEMPLATE_VARS not set - skipping templating")
             return
 
-        for _file_stats in list_template_files(self.template_dir):
+        template_files = list_template_files(self.template_dir)
+        if not template_files: return
+
+        for _file_stats in template_files:
 
             template_filepath = _file_stats["file"]
             file_dir = os.path.join(self.app_dir,_file_stats["directory"])
