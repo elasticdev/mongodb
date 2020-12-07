@@ -38,7 +38,7 @@ def run(stackargs):
     # extra disk
     stack.parse.add_optional(key="volume_name",default="null")
     stack.parse.add_optional(key="volume_size",default="null")
-    stack.parse.add_optional(key="volume_mntpt",default="/var/lib/mongodb")
+    stack.parse.add_optional(key="volume_mountpoint",default="/var/lib/mongodb")
     stack.parse.add_optional(key="volume_fstype",default="xfs")
 
     # Add substack
@@ -78,7 +78,7 @@ def run(stackargs):
         # extra disk
         if stack.volume_size: default_values["volume_size"] = stack.volume_size
         if stack.volume_name: default_values["volume_name"] = stack.volume_name
-        if stack.volume_mntpt: default_values["volume_mntpt"] = stack.volume_mntpt
+        if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
         if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
 
         inputargs = {"default_values":default_values}

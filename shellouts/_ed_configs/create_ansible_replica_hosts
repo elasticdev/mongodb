@@ -48,16 +48,25 @@ class Main(ResourceCmdHelper):
                          "method" ]
 
         self.set_inputargs(set_env_vars=set_env_vars,upper_case=None)
-        self._re_map_ansible_vars()
 
-    def _re_map_ansible_vars(self):
+        # if you want to remap vars for the application in the inputargs
+        # e.g. ANS_VAR_mongodb_public_ips to mongodb_public_ips
+        self.remap_app_vars()
 
-        for _key,_value in self.inputargs.iteritems():
-            if "ANS_VAR_" not in _key: continue
-            _mapped_key = _key.split("ANS_VAR_")[-1]
-            self.logger.debug("mapped key {} value {}".format(_key,_value))
-            self.inputargs[_mapped_key] = _value
-            del self.inputargs[_key]
+        # Testingyoyo
+        # delete below
+        #self._re_map_ansible_vars()
+
+    # Testingyoyo
+    # delete below
+    #def _re_map_ansible_vars(self):
+
+    #    for _key,_value in self.inputargs.iteritems():
+    #        if "ANS_VAR_" not in _key: continue
+    #        _mapped_key = _key.split("ANS_VAR_")[-1]
+    #        self.logger.debug("mapped key {} value {}".format(_key,_value))
+    #        self.inputargs[_mapped_key] = _value
+    #        del self.inputargs[_key]
 
     def _set_vars(self):
 
@@ -156,23 +165,25 @@ class Main(ResourceCmdHelper):
 
         self.config_file.write("\n")
 
-    def _sync_to_share(self):
+    # Testingyoyo
+    # Delete below
+    #def _sync_to_share(self):
 
-        if not self.run_share_dir: 
-            self.logger.debug("run_share_dir not defined - skipping sync-ing ...")
-            return
-            
-        cmds = []
-        _dirname = os.path.dirname(self.run_share_dir)
-        if not os.path.exists(_dirname): cmds.append("mkdir -p {}".format(_dirname))
+    #    if not self.run_share_dir: 
+    #        self.logger.debug("run_share_dir not defined - skipping sync-ing ...")
+    #        return
+    #        
+    #    cmds = []
+    #    _dirname = os.path.dirname(self.run_share_dir)
+    #    if not os.path.exists(_dirname): cmds.append("mkdir -p {}".format(_dirname))
 
-        self.logger.debug("rsync -avug {}/ {}".format(self.app_dir,self.run_share_dir))
-        cmds.append("rsync -avug {}/ {}".format(self.app_dir,self.run_share_dir))
+    #    self.logger.debug("rsync -avug {}/ {}".format(self.app_dir,self.run_share_dir))
+    #    cmds.append("rsync -avug {}/ {}".format(self.app_dir,self.run_share_dir))
 
-        for cmd in cmds:
-            self.execute(cmd,output_to_json=False,exit_error=True)
+    #    for cmd in cmds:
+    #        self.execute(cmd,output_to_json=False,exit_error=True)
 
-        self.logger.debug("Sync-ed to run share dir {}".format(self.run_share_dir))
+    #    self.logger.debug("Sync-ed to run share dir {}".format(self.run_share_dir))
 
     def create(self):
 
@@ -203,7 +214,10 @@ class Main(ResourceCmdHelper):
         self.config_file.close()
         self.logger.debug("Created Ansible host config file {}".format(self.config_file_path))
 
-        self._sync_to_share()
+        self.sync_to_share()
+
+        # Testingyoyo
+        #self._sync_to_share()
 
 def usage():
 
