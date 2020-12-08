@@ -214,9 +214,8 @@ class Main(ResourceCmdHelper):
         self.config_file.close()
         self.logger.debug("Created Ansible host config file {}".format(self.config_file_path))
 
-        self.sync_to_share()
-
         # Testingyoyo
+        #self.sync_to_share()
         #self._sync_to_share()
 
 def usage():
