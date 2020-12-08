@@ -138,6 +138,7 @@ class Main(ResourceCmdHelper):
         self.config_file.write("\n")
         self.config_file.write(self.config_network)
         self.config_file.write("\n")
+        self.config_file.write("\n")
 
     def _add_main(self):
 
@@ -214,8 +215,9 @@ class Main(ResourceCmdHelper):
         self.config_file.close()
         self.logger.debug("Created Ansible host config file {}".format(self.config_file_path))
 
+        self.sync_to_share()
+
         # Testingyoyo
-        #self.sync_to_share()
         #self._sync_to_share()
 
 def usage():
