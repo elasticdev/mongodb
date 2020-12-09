@@ -204,7 +204,10 @@ class Main(ResourceCmdHelper):
         # 172.31.1.231
 
         self._set_vars()
-        self.templify()
+
+        # update and clobber vars all and hosts
+        self.templify(clobber=True)
+
         self._create_ssh_key()
         self._create_mongodb_keyfile()
         self._create_mongodb_pem()
