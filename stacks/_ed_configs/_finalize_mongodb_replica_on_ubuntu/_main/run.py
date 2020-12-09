@@ -23,6 +23,7 @@ def run(stackargs):
     stack.parse.add_optional(key="mongodb_port",default="27017")
     stack.parse.add_optional(key="mongodb_bind_ip",default="0.0.0.0")
     stack.parse.add_optional(key="mongodb_logpath",default="/var/log/mongodb/mongod.log")
+    stack.parse.add_optional(key="publish_creds",default=True,null_allowed=True)
 
     stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
 
@@ -161,8 +162,11 @@ def run(stackargs):
     _publish_vars["mongodb_logpath"] = stack.mongodb_logpath
     _publish_vars["mongodb_public_ips"] = ",".join(public_ips)
     _publish_vars["mongodb_private_ips"] = ",".join(private_ips)
-    _publish_vars["mongodb_username"] = stack.mongodb_username
-    _publish_vars["mongodb_password"] = stack.mongodb_password
+
+    if stack.publish_creds:
+        _publish_vars["mongodb_username"] = stack.mongodb_username
+        _publish_vars["mongodb_password"] = stack.mongodb_password
+
     stack.publish(_publish_vars)
 
     return stack.get_results()
