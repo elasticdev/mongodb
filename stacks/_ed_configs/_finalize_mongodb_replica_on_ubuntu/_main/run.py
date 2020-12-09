@@ -18,7 +18,6 @@ def run(stackargs):
     stack.parse.add_optional(key="mongodb_password",default="_random")
     stack.parse.add_optional(key="vm_username",default="ubuntu")
     stack.parse.add_optional(key="mongodb_data_dir",default="/var/lib/mongodb")
-    stack.parse.add_optional(key="mongodb_db_name",default="mymongodb")
     stack.parse.add_optional(key="mongodb_storage_engine",default="wiredTiger")
     stack.parse.add_optional(key="mongodb_version",default="4.0.3")
     stack.parse.add_optional(key="mongodb_port",default="27017")
@@ -78,7 +77,6 @@ def run(stackargs):
     env_vars = {"ANS_VAR_mongodb_pem":mongodb_pem}
     env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
     env_vars["ANS_VAR_private_key"] = private_key
-    env_vars["ANS_VAR_mongodb_db_name"] = stack.mongodb_db_name
     env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
     env_vars["ANS_VAR_mongodb_port"] = stack.mongodb_port
     env_vars["ANS_VAR_mongodb_data_dir"] = stack.mongodb_data_dir
@@ -155,7 +153,6 @@ def run(stackargs):
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
 
     _publish_vars = {"mongodb_cluster":stack.mongodb_cluster}
-    _publish_vars["mongodb_db_name"] = stack.mongodb_db_name
     _publish_vars["mongodb_version"] = stack.mongodb_version
     _publish_vars["mongodb_port"] = stack.mongodb_port
     _publish_vars["mongodb_data_dir"] = stack.mongodb_data_dir

@@ -19,4 +19,3 @@ mongodb_profiling_mode: "off"
 mongodb_enable_localhost_auth_bypass: true
 mongodb_is_arbiter: false
 mongodb_authorization_enabled: true
-mongodb_name: mymongodb

@@ -4,7 +4,6 @@ mongodb_admin_user: {{ mongodb_username }}
 mongodb_admin_pass: {{ mongodb_password }}
 mongodb_dbpath: {{ mongodb_data_dir }}
 mongodb_storage_engine: {{ mongodb_storage_engine }}
-mongodb_name: {{ mongodb_db_name }}
 mongodb_version: {{ mongodb_version }}
 mongodb_port: {{ mongodb_port }}
 mongodb_bind_ip: {{ mongodb_bind_ip }}
