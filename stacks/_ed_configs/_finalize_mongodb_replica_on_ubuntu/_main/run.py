@@ -101,9 +101,8 @@ def run(stackargs):
     # This is the default, but choose to be explicit
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
 
-    # Testingyoyo
+    #human_description = "Setting up Ansible for MongoDb mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
     human_description = "Setting up Ansible for MongoDb"
-    human_description = "Setting up Ansible for MongoDb mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
     inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["name"] = stack.mongodb_cluster
@@ -154,5 +153,19 @@ def run(stackargs):
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = "Add slave nodes to the master node"
     stack.ubuntu_vendor_init_replica.insert(**inputargs)
+
+    _publish_vars = {"mongodb_cluster":stack.mongodb_cluster}
+    _publish_vars["mongodb_db_name"] = stack.mongodb_db_name
+    _publish_vars["mongodb_version"] = stack.mongodb_version
+    _publish_vars["mongodb_port"] = stack.mongodb_port
+    _publish_vars["mongodb_data_dir"] = stack.mongodb_data_dir
+    _publish_vars["mongodb_storage_engine"] = stack.mongodb_storage_engine
+    _publish_vars["mongodb_bind_ip"] = stack.mongodb_bind_ip
+    _publish_vars["mongodb_logpath"] = stack.mongodb_logpath
+    _publish_vars["mongodb_public_ips"] = ",".join(public_ips)
+    _publish_vars["mongodb_private_ips"] = ",".join(private_ips)
+    _publish_vars["mongodb_username"] = stack.mongodb_username
+    _publish_vars["mongodb_password"] = stack.mongodb_password
+    stack.publish(_publish_vars)
 
     return stack.get_results()
