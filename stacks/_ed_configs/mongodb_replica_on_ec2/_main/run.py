@@ -100,7 +100,7 @@ def run(stackargs):
     if stack.vm_username: default_values["vm_username"] = stack.vm_username
 
     inputargs = {"default_values":default_values}
-    human_description = "Initialing Ubuntu specific actions"
+    human_description = "Initialing Ubuntu specific actions mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
     stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
