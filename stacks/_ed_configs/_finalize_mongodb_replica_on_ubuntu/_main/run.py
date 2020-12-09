@@ -101,11 +101,14 @@ def run(stackargs):
     # This is the default, but choose to be explicit
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
 
+    # Testingyoyo
+    human_description = "Setting up Ansible for MongoDb"
+    human_description = "Setting up Ansible for MongoDb mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
     inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["name"] = stack.mongodb_cluster
     inputargs["stateful_id"] = stack.stateful_id
-    inputargs["human_description"] = "Setting up Ansible for MongoDb"
+    inputargs["human_description"] = human_description
     stack.ubuntu_vendor_setup.insert(**inputargs)
 
     env_vars = {"USE_DOCKER":True}
