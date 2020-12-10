@@ -24,6 +24,7 @@ def run(stackargs):
     stack.parse.add_optional(key="mongodb_bind_ip",default="0.0.0.0")
     stack.parse.add_optional(key="mongodb_logpath",default="/var/log/mongodb/mongod.log")
     stack.parse.add_optional(key="publish_creds",default=True,null_allowed=True)
+    stack.parse.add_optional(key="use_docker",default=True,null_allowed=True)
 
     stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
 
@@ -109,9 +110,9 @@ def run(stackargs):
     inputargs["human_description"] = human_description
     stack.ubuntu_vendor_setup.insert(**inputargs)
 
-    env_vars = {"USE_DOCKER":True}
-    env_vars["stateful_id".upper()] = stack.stateful_id
+    env_vars = {"stateful_id".upper():stack.stateful_id}
     env_vars["docker_exec_env".upper()] = stack.docker_exec_env
+    if stack.use_docker: env_vars["use_docker".upper()] = True
 
     inputargs = {"display":True}
     inputargs["name"] = stack.mongodb_cluster
