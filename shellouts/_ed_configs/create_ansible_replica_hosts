@@ -76,7 +76,7 @@ class Main(ResourceCmdHelper):
         else:
             self.private_secondaries = None
 
-        self.config_file_path = "{}/hosts".format(self.app_dir)
+        self.config_file_path = "{}/hosts".format(self.exec_dir)
         self.config_file = open(self.config_file_path,"w")
 
     def _write_file(self,key,filepath):
@@ -90,19 +90,19 @@ class Main(ResourceCmdHelper):
 
     def _create_mongodb_keyfile(self):
 
-        filepath = os.path.join(self.app_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
+        filepath = os.path.join(self.exec_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
         self._write_file("mongodb_keyfile",filepath)
         #os.system("chmod 400 {}".format(filepath))
 
     def _create_mongodb_pem(self):
 
-        filepath = os.path.join(self.app_dir,"roles","init_replica_nodes","files","mongodb.pem")
+        filepath = os.path.join(self.exec_dir,"roles","init_replica_nodes","files","mongodb.pem")
         self._write_file("mongodb_pem",filepath)
         os.system("chmod 400 {}".format(filepath))
         
     def _create_ssh_key(self):
 
-        filepath = "{}/ssh_key.pem".format(self.app_dir)
+        filepath = "{}/ssh_key.pem".format(self.exec_dir)
         self._write_file("private_key",filepath)
         os.system("chmod 400 {}".format(filepath))
         
