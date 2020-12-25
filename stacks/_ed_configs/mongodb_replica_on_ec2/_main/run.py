@@ -18,6 +18,10 @@ def run(stackargs):
     # We will enable random suffix to add to the hostname
     stack.parse.add_optional(key="hostname_random",default="null")
 
+    # if bastion_config, then bastion_config will create a bastion_hostname
+    # used to configure the mongodb cluster
+    stack.parse.add_optional(key="bastion_config",default="null")
+
     # Testingyoyo
     #stack.parse.add_required(key="image")
     #stack.parse.add_required(key="aws_default_region",default="us-east-1")
@@ -55,9 +59,30 @@ def run(stackargs):
 
     if stack.hostname_random:
         hostname_base = "{}-replica-{}".format(stack.mongodb_cluster,stack.random_id(size=3).lower())
-
     else:
         hostname_base = "{}-replica".format(stack.mongodb_cluster)
+
+    # Testingyoyo
+    # set bastion config and hostname
+    if stack.bastion_config:
+        stack.set_variable("bastion_hostname","{}-config".format(stack.mongodb_cluster))
+        default_values = {"hostname":stack.bastion_hostname}
+        default_values["image"] = stack.image
+        default_values["aws_default_region"] = stack.aws_default_region
+        default_values["security_groups"] = stack.security_groups
+        default_values["vpc_name"] = stack.vpc_name
+        default_values["subnet"] = "public"
+        default_values["size"] = stack.size
+        default_values["disksize"] = stack.disksize
+        default_values["register_to_ed"] = True
+
+        inputargs = {"default_values":default_values}
+        human_description = "Creating bastion config hostname {} on ec2".format(stack.bastion_hostname)
+        inputargs["automation_phase"] = "infrastructure"
+        inputargs["human_description"] = human_description
+        stack.ec2_ubuntu.insert(display=True,**inputargs)
+    else:
+        stack.set_variable("bastion_hostname",None)
 
     for num in range(int(stack.num_of_replicas)):
 
@@ -78,8 +103,12 @@ def run(stackargs):
         # extra disk
         if stack.volume_size: default_values["volume_size"] = stack.volume_size
         if stack.volume_name: default_values["volume_name"] = stack.volume_name
-        if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
-        if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
+
+        # if bastion_config, then the workers cannot access the hosts unless 
+        # using a bastion hosts to do so
+        if not stack.bastion_config:
+            if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
+            if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
 
         inputargs = {"default_values":default_values}
         human_description = "Creating hostname {} on ec2".format(hostname)
@@ -98,6 +127,12 @@ def run(stackargs):
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
     if stack.vm_username: default_values["vm_username"] = stack.vm_username
+
+    # if bastion_hostname, we will configure it through the bastion_hostname
+    if stack.bastion_hostname: 
+        default_values["bastion_hostname"] = stack.bastion_hostname
+        if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
+        if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
 
     inputargs = {"default_values":default_values}
     human_description = "Initialing Ubuntu specific actions mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)

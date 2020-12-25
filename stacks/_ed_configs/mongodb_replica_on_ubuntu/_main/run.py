@@ -14,11 +14,16 @@ def run(stackargs):
     stack.parse.add_optional(key="mongodb_username",default="null")
     stack.parse.add_optional(key="mongodb_password",default="null")
     stack.parse.add_optional(key="vm_username",default="ubuntu")
+    stack.parse.add_optional(key="bastion_hostname",default="null")
+
+    stack.parse.add_optional(key="volume_mountpoint",default="/var/lib/mongodb")
+    stack.parse.add_optional(key="volume_fstype",default="xfs")
 
     # Add substack
     stack.add_substack('elasticdev:::create_mongodb_pem')
     stack.add_substack('elasticdev:::create_mongodb_keyfile')
     stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_ubuntu')
+    stack.add_substack('elasticdev:::_mongodb_replica_on_ubuntu_by_bastion_config')
 
     # Initialize 
     stack.init_variables()
@@ -57,11 +62,20 @@ def run(stackargs):
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
 
-    inputargs = {"default_values":default_values}
-    human_description = 'Finalizing mongodb replica set and init'
-    inputargs["automation_phase"] = "infrastructure"
-    inputargs["human_description"] = human_description
+    inputargs = {"automation_phase":"infrastructure"}
 
-    stack._finalize_mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
+    # Testingyoyo
+    if stack.bastion_hostname:
+        human_description = 'Finalizing mongodb replica by bastion hostname {}'.format(stack.bastion_hostname)
+        if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
+        if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
+        inputargs["default_values"] = default_values
+        inputargs["human_description"] = human_description
+        stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)
+    else:
+        human_description = 'Finalizing mongodb replica set and init'
+        inputargs["default_values"] = default_values
+        inputargs["human_description"] = human_description
+        stack._finalize_mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
 
     return stack.get_results()
