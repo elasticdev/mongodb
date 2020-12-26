@@ -50,6 +50,10 @@ def run(stackargs):
     stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
 
     # Add Execution Group
+    # Testingyoyo
+    # ubuntu 18.04 - install docker with regular hostgroup and shell scripting
+
+    #stack.add_hostgroups("elasticdev:::aws::config_vol")
     stack.add_hostgroups("elasticdev:::aws::config_vol")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_setup")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_init_replica")
@@ -121,6 +125,8 @@ def run(stackargs):
         inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
         inputargs["automation_phase"] = "infrastructure"
         stack.add_groups_to_host(groups=stack.config_vol,hostname=stack.bastion_hostname)
+
+    return stack.get_results()
 
     ################################################################
     ## Testing one change at a time below
@@ -252,4 +258,4 @@ def run(stackargs):
     ## Testingyoyo
     ## Testingyoyo
 
-    return stack.get_results()
+    #return stack.get_results()

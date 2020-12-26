@@ -24,6 +24,7 @@ def run(stackargs):
     stack.parse.add_optional(key="bastion_config",default="null")
     stack.parse.add_optional(key="bastion_security_groups",default="bastion")
     stack.parse.add_optional(key="bastion_subnet",default="private")
+    stack.parse.add_optional(key="bastion_image",default="ami-06fb5332e8e3e577a")
 
     # Testingyoyo
     #stack.parse.add_required(key="image")
@@ -70,7 +71,7 @@ def run(stackargs):
     if stack.bastion_config:
         stack.set_variable("bastion_hostname","{}-config".format(stack.mongodb_cluster))
         default_values = {"hostname":stack.bastion_hostname}
-        default_values["image"] = stack.image
+        default_values["image"] = stack.bastion_image
         default_values["aws_default_region"] = stack.aws_default_region
         default_values["security_groups"] = stack.bastion_security_groups
         default_values["vpc_name"] = stack.vpc_name

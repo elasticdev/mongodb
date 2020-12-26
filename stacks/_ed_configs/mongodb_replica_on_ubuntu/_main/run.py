@@ -58,7 +58,6 @@ def run(stackargs):
     default_values["ssh_keyname"] = stack.ssh_keyname
     default_values["mongodb_hosts"] = stack.mongodb_hosts
     default_values["vm_username"] = stack.vm_username
-    default_values["config_network"] = stack.config_network
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
 
@@ -69,11 +68,13 @@ def run(stackargs):
         human_description = 'Finalizing mongodb replica by bastion hostname {}'.format(stack.bastion_hostname)
         if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
         if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
+        default_values["bastion_hostname"] = stack.bastion_hostname
         inputargs["default_values"] = default_values
         inputargs["human_description"] = human_description
         stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)
     else:
         human_description = 'Finalizing mongodb replica set and init'
+        default_values["config_network"] = stack.config_network
         inputargs["default_values"] = default_values
         inputargs["human_description"] = human_description
         stack._finalize_mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
