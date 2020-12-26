@@ -54,9 +54,9 @@ def run(stackargs):
     # ubuntu 18.04 - install docker with regular hostgroup and shell scripting
 
     #stack.add_hostgroups("elasticdev:::aws::config_vol")
-    stack.add_hostgroups("elasticdev:::aws::config_vol")
-    stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_setup")
-    stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_init_replica")
+    stack.add_hostgroups("elasticdev:::aws::config_vol","config_vol")
+    stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_setup","ubuntu_vendor_setup")
+    stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_init_replica","ubuntu_vendor_init_replica")
 
     # Initialize 
     stack.init_variables()
