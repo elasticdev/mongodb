@@ -8,6 +8,7 @@ def run(stackargs):
     stack.parse.add_required(key="num_of_replicas",default="1")
     stack.parse.add_required(key="ssh_keyname")
 
+    # Testingyoyo
     # This will be public_main/private_main
     stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
 
@@ -21,6 +22,8 @@ def run(stackargs):
     # if bastion_config, then bastion_config will create a bastion_hostname
     # used to configure the mongodb cluster
     stack.parse.add_optional(key="bastion_config",default="null")
+    stack.parse.add_optional(key="bastion_security_groups",default="bastion")
+    stack.parse.add_optional(key="bastion_subnet",default="private")
 
     # Testingyoyo
     #stack.parse.add_required(key="image")
@@ -69,9 +72,9 @@ def run(stackargs):
         default_values = {"hostname":stack.bastion_hostname}
         default_values["image"] = stack.image
         default_values["aws_default_region"] = stack.aws_default_region
-        default_values["security_groups"] = stack.security_groups
+        default_values["security_groups"] = stack.bastion_security_groups
         default_values["vpc_name"] = stack.vpc_name
-        default_values["subnet"] = "public"
+        default_values["subnet"] = stack.bastion_subnet
         default_values["size"] = stack.size
         default_values["disksize"] = stack.disksize
         default_values["register_to_ed"] = True
@@ -130,6 +133,7 @@ def run(stackargs):
 
     # if bastion_hostname, we will configure it through the bastion_hostname
     if stack.bastion_hostname: 
+
         default_values["bastion_hostname"] = stack.bastion_hostname
         if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
         if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
