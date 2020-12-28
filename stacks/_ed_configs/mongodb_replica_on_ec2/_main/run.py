@@ -87,18 +87,23 @@ def run(stackargs):
         #             "overide_values":overide_values}
 
         stack.set_variable("bastion_hostname","{}-config".format(stack.mongodb_cluster))
+
         default_values = {"hostname":stack.bastion_hostname}
         default_values["keyname"] = stack.ssh_keyname
-        default_values["image"] = stack.bastion_image
         default_values["aws_default_region"] = stack.aws_default_region
-        default_values["security_groups"] = stack.bastion_security_groups
         default_values["vpc_name"] = stack.vpc_name
-        default_values["subnet"] = stack.bastion_subnet
         default_values["size"] = stack.size
         default_values["disksize"] = stack.disksize
-        default_values["register_to_ed"] = True
 
-        inputargs = {"default_values":default_values}
+        overide_values = {"hostname":stack.bastion_hostname}
+        overide_values["register_to_ed"] = True
+        overide_values["subnet"] = stack.bastion_subnet
+        overide_values["security_groups"] = stack.bastion_security_groups
+        overide_values["image"] = stack.bastion_image
+
+        inputargs = {"default_values":default_values,
+                     "overide_values":overide_values}
+
         human_description = "Creating bastion config hostname {} on ec2".format(stack.bastion_hostname)
         inputargs["automation_phase"] = "infrastructure"
         inputargs["human_description"] = human_description
