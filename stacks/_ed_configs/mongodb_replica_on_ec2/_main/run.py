@@ -69,7 +69,9 @@ def run(stackargs):
     # Testingyoyo
     # set bastion config and hostname
     if stack.bastion_config:
-        stack.set_variable("bastion_hostname","{}-config".format(stack.mongodb_cluster))
+
+        stack.set_variable("bastion_hostname","{}-config".format(hostname_base))
+
         default_values = {"vpc_name":stack.vpc_name}
         default_values["keyname"] = stack.ssh_keyname
         default_values["aws_default_region"] = stack.aws_default_region
@@ -83,8 +85,12 @@ def run(stackargs):
         overide_values["image"] = stack.bastion_image
         overide_values = {"hostname":stack.bastion_hostname}
 
+        # Testingyoyo
         inputargs = {"default_values":default_values,
                      "overide_values":overide_values}
+
+        # Testingyoyo
+        inputargs = {"default_values":default_values}
         human_description = "Creating bastion config hostname {} on ec2".format(stack.bastion_hostname)
         inputargs["automation_phase"] = "infrastructure"
         inputargs["human_description"] = human_description
