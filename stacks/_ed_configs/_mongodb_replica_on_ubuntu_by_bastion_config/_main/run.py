@@ -60,7 +60,7 @@ def run(stackargs):
 
     # Initialize 
     stack.init_variables()
-    stack.init_execgroups()
+    stack.init_hostgroups()
 
     # get ssh_key
     _lookup = {"must_exists":True}
