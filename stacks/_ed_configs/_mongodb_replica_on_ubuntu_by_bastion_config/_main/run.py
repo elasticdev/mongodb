@@ -109,6 +109,10 @@ def run(stackargs):
     ###############################################################
     for mongodb_host_info in mongodb_hosts_info:
 
+        human_description = 'Format and mount volume on mongodb_host "{}" fstype {} mountpoint {}'.format(mongodb_host_info["hostname"],
+                                                                                                          stack.volume_fstype,
+                                                                                                          stack.volume_mountpoint)
+        inputargs = {"display":True}
         env_vars = {"METHOD":"create"}
         env_vars["STATEFUL_ID"] = stack.random_id(size=10)
         env_vars["ANS_VAR_volume_fstype"] = stack.volume_fstype
@@ -117,14 +121,14 @@ def run(stackargs):
         env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-format.yml,entry_point/30-mount.yml"
         env_vars["ANS_VAR_host_ips"] = mongodb_host_info["private_ip"]
 
-        inputargs = {"display":True}
-        inputargs["human_description"] = 'Format and mount volume on mongodb_host "{}" fstype {} mountpoint {}'.format(mongodb_host_info["hostname"],
-                                                                                                                       stack.volume_fstype,
-                                                                                                                       stack.volume_mountpoint)
+        inputargs["human_description"] = human_description
         inputargs["env_vars"] = json.dumps(env_vars)
         inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
         inputargs["automation_phase"] = "infrastructure"
-        stack.add_groups_to_host(groups=stack.config_vol,hostname=stack.bastion_hostname)
+        inputargs["hostname"] = stack.bastion_hostname
+        inputargs["groups"] = stack.config_vol
+
+        stack.add_groups_to_host(**inputargs)
 
     return stack.get_results()
 
