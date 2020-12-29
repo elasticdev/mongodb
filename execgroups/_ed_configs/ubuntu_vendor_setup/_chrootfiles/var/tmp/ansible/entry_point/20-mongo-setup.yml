@@ -7,3 +7,4 @@
       mongodb_keyfile: ../roles/init_replica_nodes/files/mongodb_keyfile
       mongodb_pem: ../roles/init_replica_nodes/files/mongodb.pem
       # mongodb_repl_oplog_size: 51200
+      #
