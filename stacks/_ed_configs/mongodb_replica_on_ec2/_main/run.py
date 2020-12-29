@@ -86,7 +86,7 @@ def run(stackargs):
         #inputargs = {"default_values":default_values,
         #             "overide_values":overide_values}
 
-        stack.set_variable("bastion_hostname","{}-config".format(stack.mongodb_cluster))
+        stack.set_variable("bastion_hostname","{}-config".format(hostname_base))
 
         default_values = {"hostname":stack.bastion_hostname}
         default_values["keyname"] = stack.ssh_keyname
