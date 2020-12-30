@@ -1,3 +1,12 @@
+def _set_volume_parameters(stack,hostname):
+
+    if not stack.volume_size: return None
+
+    volume_name = "{}-{}".format(hostname,stack.volume_mountpoint)
+    stack.set_variable("volume_name",volume_name)
+
+    return volume_name
+
 def run(stackargs):
 
     # instantiate authoring stack
@@ -44,7 +53,6 @@ def run(stackargs):
     stack.parse.add_optional(key="labels",default="null")
 
     # extra disk
-    stack.parse.add_optional(key="volume_name",default="null")
     stack.parse.add_optional(key="volume_size",default="null")
     stack.parse.add_optional(key="volume_mountpoint",default="/var/lib/mongodb")
     stack.parse.add_optional(key="volume_fstype",default="xfs")
@@ -127,15 +135,21 @@ def run(stackargs):
         default_values["disksize"] = stack.disksize
         default_values["register_to_ed"] = None
 
-        # extra disk
-        if stack.volume_size: default_values["volume_size"] = stack.volume_size
-        if stack.volume_name: default_values["volume_name"] = stack.volume_name
-
         # if bastion_config, then the workers cannot access the hosts unless 
-        # using a bastion hosts to do so
-        if not stack.bastion_config:
-            if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
-            if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
+        # using a bastion hosts to do so.  we only include volume_fstype if
+        # is accessible through a non-bastion host. 
+
+        volume_name = _set_volume_parameters(stack,hostname)
+
+        if not stack.bastion_config and volume_name:
+            default_values["volume_size"] = stack.volume_size
+            default_values["volume_name"] = volume_name
+            default_values["volume_fstype"] = stack.volume_fstype
+            default_values["volume_mountpoint"] = stack.volume_mountpoint
+
+        if stack.bastion_config and volume_name:
+            default_values["volume_size"] = stack.volume_size
+            default_values["volume_name"] = volume_name
 
         inputargs = {"default_values":default_values}
         human_description = "Creating hostname {} on ec2".format(hostname)
@@ -156,11 +170,15 @@ def run(stackargs):
     if stack.vm_username: default_values["vm_username"] = stack.vm_username
 
     # if bastion_hostname, we will configure it through the bastion_hostname
+    # including the formating and mounting of volumes if volume_size is 
+    # specified
     if stack.bastion_hostname: 
 
         default_values["bastion_hostname"] = stack.bastion_hostname
-        if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
-        if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
+
+        if stack.volume_size:
+            default_values["volume_mountpoint"] = stack.volume_mountpoint
+            default_values["volume_fstype"] = stack.volume_fstype
 
     inputargs = {"default_values":default_values}
     human_description = "Initialing Ubuntu specific actions mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
