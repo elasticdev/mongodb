@@ -20,6 +20,57 @@ def _get_volume_id(volume_name):
 
     return _info["volume_id"]
 
+def _get_ssh_key(stack):
+
+    _lookup = {"must_exists":True}
+    _lookup["resource_type"] = "ssh_key_pair"
+    _lookup["name"] = stack.ssh_keyname
+
+    return list(stack.get_resource(decrypt=True,**_lookup))[0]["private_key"]
+
+def _get_mongodb_pem(stack):
+
+    _lookup = {"must_exists":True}
+    _lookup["resource_type"] = "ssl_pem"
+    _lookup["provider"] = "openssl"
+    _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
+
+    return list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+
+    # lookup mongodb keyfile needed for secure mongodb replication
+def _get_mongodb_keyfile(stack):
+    _lookup = {"must_exists":True}
+    _lookup["provider"] = "openssl"
+    _lookup["resource_type"] = "symmetric_key"
+    _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
+
+    return list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+
+def _get_mongodb_hosts(stack):
+
+    public_ips = []
+    private_ips = []
+    mongodb_hosts_info = []
+
+    _lookup = {"must_exists":True,"must_be_one":True}
+    _lookup["resource_type"] = "server"
+
+    mongodb_hosts = stack.to_list(stack.mongodb_hosts)
+
+    for mongodb_host in mongodb_hosts:
+
+        _lookup["hostname"] = mongodb_host
+        _host_info = list(stack.get_resource(**_lookup))[0]
+        mongodb_hosts_info.append(_host_info)
+
+        stack.logger.debug_highlight('mongo hostname {}, found public_ip address "{}"'.format(mongodb_host,
+                                                                                              _host_info["public_ip"]))
+
+        if _host_info["public_ip"] not in public_ips: public_ips.append(_host_info["public_ip"])
+        if _host_info["private_ip"] not in private_ips: private_ips.append(_host_info["private_ip"])
+
+    return mongodb_hosts_info,public_ips,private_ips
+
 def run(stackargs):
 
     import json
@@ -63,50 +114,23 @@ def run(stackargs):
     stack.init_hostgroups()
 
     # get ssh_key
-    _lookup = {"must_exists":True}
-    _lookup["resource_type"] = "ssh_key_pair"
-    _lookup["name"] = stack.ssh_keyname
-    private_key = list(stack.get_resource(decrypt=True,**_lookup))[0]["private_key"]
+    private_key = _get_ssh_key(stack)
 
     # get mongodb pem key
-    _lookup = {"must_exists":True}
-    _lookup["resource_type"] = "ssl_pem"
-    _lookup["provider"] = "openssl"
-    _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
-    mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    mongodb_pem = _get_mongodb_pem(stack)
 
     # lookup mongodb keyfile needed for secure mongodb replication
-    _lookup = {"must_exists":True}
-    _lookup["provider"] = "openssl"
-    _lookup["resource_type"] = "symmetric_key"
-    _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
-    mongodb_keyfile = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    mongodb_keyfile = _get_mongodb_keyfile(stack)
 
     # collect mongodb_hosts info
-    public_ips = []
-    private_ips = []
-    mongodb_hosts_info = []
+    mongodb_hosts_info,public_ips,private_ips = _get_mongodb_hosts(stack)
 
-    _lookup = {"must_exists":True,"must_be_one":True}
-    _lookup["resource_type"] = "server"
+    # install docker on bastion hosts
+    # install python on mongodb_hosts
+    # mount volumes on mongodb_hosts
+    # install mongodb on mongodb_hosts
 
-    mongodb_hosts = stack.to_list(stack.mongodb_hosts)
-
-    for mongodb_host in mongodb_hosts:
-
-        _lookup["hostname"] = mongodb_host
-        _host_info = list(stack.get_resource(**_lookup))[0]
-        mongodb_hosts_info.append(_host_info)
-
-        stack.logger.debug_highlight('mongo hostname {}, found public_ip address "{}"'.format(mongodb_host,
-                                                                                              _host_info["public_ip"]))
-
-        if _host_info["public_ip"] not in public_ips: public_ips.append(_host_info["public_ip"])
-        if _host_info["private_ip"] not in private_ips: private_ips.append(_host_info["private_ip"])
-
-    ###############################################################
     # mount volumes
-    ###############################################################
     for mongodb_host_info in mongodb_hosts_info:
 
         human_description = 'Format and mount volume on mongodb_host "{}" fstype {} mountpoint {}'.format(mongodb_host_info["hostname"],
