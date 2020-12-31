@@ -103,8 +103,6 @@ def run(stackargs):
     # Add Execution Group
     # Testingyoyo
     # ubuntu 18.04 - install docker with regular hostgroup and shell scripting
-
-    #stack.add_hostgroups("elasticdev:::aws::config_vol")
     stack.add_hostgroups("elasticdev:::aws::config_vol","config_vol")
     stack.add_hostgroups("elasticdev:::ubuntu::18.04-docker","install_docker")
     stack.add_hostgroups("elasticdev:::ansible::ubuntu-18.04","install_python")
@@ -144,7 +142,7 @@ def run(stackargs):
         env_vars = {"METHOD":"create"}
         env_vars["STATEFUL_ID"] = stack.random_id(size=10)
         env_vars["ANS_VAR_private_key"] = private_key
-        env_vars["ANS_VAR_exec_ymls"] = "entry_point/10-install-python"
+        env_vars["ANS_VAR_exec_ymls"] = "entry_point/10-install-python.yml"
         env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
         env_vars["ANS_VAR_host_ips"] = mongodb_host_info["private_ip"]
 
