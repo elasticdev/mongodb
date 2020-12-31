@@ -106,6 +106,8 @@ def run(stackargs):
 
     #stack.add_hostgroups("elasticdev:::aws::config_vol")
     stack.add_hostgroups("elasticdev:::aws::config_vol","config_vol")
+    stack.add_hostgroups("elasticdev:::ubuntu::18.04-docker","install_docker")
+    stack.add_hostgroups("elasticdev:::ansible::ubuntu-18.04","install_python")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_setup","ubuntu_vendor_setup")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_init_replica","ubuntu_vendor_init_replica")
 
@@ -126,18 +128,42 @@ def run(stackargs):
     mongodb_hosts_info,public_ips,private_ips = _get_mongodb_hosts(stack)
 
     # install docker on bastion hosts
-    # install python on mongodb_hosts
+    inputargs = {"display":True}
+    inputargs["human_description"] = "Install Docker on bastion {}".format(stack.bastion_hostname)
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.install_docker
+    stack.add_groups_to_host(**inputargs)
+
     # mount volumes on mongodb_hosts
     # install mongodb on mongodb_hosts
 
-    # mount volumes
     for mongodb_host_info in mongodb_hosts_info:
 
+        # install python on mongodb_hosts
+        env_vars = {"METHOD":"create"}
+        env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+        env_vars["ANS_VAR_private_key"] = private_key
+        env_vars["ANS_VAR_exec_ymls"] = "entry_point/10-install-python"
+        env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
+        env_vars["ANS_VAR_host_ips"] = mongodb_host_info["private_ip"]
+
+        inputargs = {"display":True}
+        inputargs["human_description"] = 'Install Python for Ansible'
+        inputargs["env_vars"] = json.dumps(env_vars)
+        inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+        inputargs["automation_phase"] = "infrastructure"
+        inputargs["hostname"] = stack.bastion_hostname
+        inputargs["groups"] = stack.install_python
+        stack.add_groups_to_host(**inputargs)
+
+        # mount volumes
         human_description = 'Format and mount volume on mongodb_host "{}" fstype {} mountpoint {}'.format(mongodb_host_info["hostname"],
                                                                                                           stack.volume_fstype,
                                                                                                           stack.volume_mountpoint)
         inputargs = {"display":True}
         env_vars = {"METHOD":"create"}
+        env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
         env_vars["STATEFUL_ID"] = stack.random_id(size=10)
         env_vars["ANS_VAR_volume_fstype"] = stack.volume_fstype
         env_vars["ANS_VAR_volume_mountpoint"] = stack.volume_mountpoint

@@ -97,11 +97,8 @@ def run(stackargs):
         env_vars["ANS_VAR_mongodb_config_network"] = public_ips[0]
 
     env_vars["METHOD"] = "create"
-
-    # This is the default, but choose to be explicit
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
 
-    #human_description = "Setting up Ansible for MongoDb mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
     human_description = "Setting up Ansible for MongoDb"
     inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
