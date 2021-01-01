@@ -108,18 +108,23 @@ def run(stackargs):
     stack.parse.add_optional(key="terraform_docker_exec_env",default="elasticdev/terraform-run-env")
     stack.parse.add_optional(key="ansible_docker_exec_env",default="elasticdev/ansible-run-env")
 
-    # Add Execution Group
     # Testingyoyo
     # ubuntu 18.04 - install docker with regular hostgroup and shell scripting
+
+    # Add execgroup
+    stack.add_execgroup("elasticdev:::aws::attach_volume_to_ec2")
+
+    # Add host group
     stack.add_hostgroups("elasticdev:::ubuntu::18.04-docker","install_docker")
     stack.add_hostgroups("elasticdev:::ansible::ubuntu-18.04","install_python")
-    stack.add_hostgroups("elasticdev:::aws::attach_volume_to_ec2","attach_volume_to_ec2")
+    #stack.add_hostgroups("elasticdev:::aws::attach_volume_to_ec2","attach_volume_to_ec2")
     stack.add_hostgroups("elasticdev:::aws::config_vol","config_vol")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_setup","ubuntu_vendor_setup")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_init_replica","ubuntu_vendor_init_replica")
 
     # Initialize 
     stack.init_variables()
+    stack.init_execgroups()
     stack.init_hostgroups()
 
     # get ssh_key
@@ -187,18 +192,20 @@ def run(stackargs):
         _docker_env_fields_keys.remove("METHOD")
         env_vars["DOCKER_ENV_FIELDS"] = ",".join(_docker_env_fields_keys)
 
-        insert_env_vars = ["AWS_ACCESS_KEY_ID"]
-        insert_env_vars.append("AWS_SECRET_ACCESS_KEY")
+        #insert_env_vars = ["AWS_ACCESS_KEY_ID"]
+        #insert_env_vars.append("AWS_SECRET_ACCESS_KEY")
   
         inputargs = {"display":True}
         inputargs["human_description"] = 'Attaches ebs volume to instance_id "{}"'.format(instance_id)
         inputargs["env_vars"] = json.dumps(env_vars)
-        inputargs["insert_env_vars"] = insert_env_vars
         inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
         inputargs["automation_phase"] = "infrastructure"
-        inputargs["hostname"] = stack.bastion_hostname
-        inputargs["groups"] = stack.attach_volume_to_ec2
-        stack.add_groups_to_host(**inputargs)
+        stack.attach_volume_to_ec2.insert(**inputargs)
+
+        #inputargs["insert_env_vars"] = insert_env_vars
+        #inputargs["hostname"] = stack.bastion_hostname
+        #inputargs["groups"] = stack.attach_volume_to_ec2
+        #stack.add_groups_to_host(**inputargs)
 
     # mount volumes
     human_description = 'Format and mount volume on mongodb hosts fstype {} mountpoint {}'.format(stack.volume_fstype,
