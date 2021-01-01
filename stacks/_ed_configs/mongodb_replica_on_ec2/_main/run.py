@@ -131,7 +131,7 @@ def run(stackargs):
     default_values["volume_fstype"] = stack.volume_fstype
 
     inputargs = {"default_values":default_values}
-    human_description = "Initialing Ubuntu specific actions mongodb_username {} mongodb_password {}".format(stack.mongodb_username,stack.mongodb_password)
+    human_description = "Initialing Ubuntu specific actions mongodb_username and mongodb_password"
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
     stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
