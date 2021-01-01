@@ -179,17 +179,21 @@ def run(stackargs):
         env_vars["RESOURCE_TAGS"] = "{},{},{},{}".format("ebs","ebs_attach", "aws", stack.aws_default_region)
         env_vars["METHOD"] = "create"
         env_vars["use_docker".upper()] = True
-  
+
         _docker_env_fields_keys = env_vars.keys()
         _docker_env_fields_keys.append("AWS_ACCESS_KEY_ID")
         _docker_env_fields_keys.append("AWS_SECRET_ACCESS_KEY")
         _docker_env_fields_keys.append("AWS_DEFAULT_REGION")
         _docker_env_fields_keys.remove("METHOD")
         env_vars["DOCKER_ENV_FIELDS"] = ",".join(_docker_env_fields_keys)
+
+        insert_env_vars = ["AWS_ACCESS_KEY_ID"]
+        insert_env_vars.append("AWS_SECRET_ACCESS_KEY")
   
         inputargs = {"display":True}
         inputargs["human_description"] = 'Attaches ebs volume to instance_id "{}"'.format(instance_id)
         inputargs["env_vars"] = json.dumps(env_vars)
+        inputargs["insert_env_vars"] = insert_env_vars
         inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
         inputargs["automation_phase"] = "infrastructure"
         inputargs["hostname"] = stack.bastion_hostname
