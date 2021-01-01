@@ -7,6 +7,7 @@ def run(stackargs):
     stack.parse.add_required(key="mongodb_hosts")
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="ssh_keyname")
+    stack.parse.add_required(key="bastion_hostname")
 
     # This will be public_main/private_main
     stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
@@ -14,7 +15,6 @@ def run(stackargs):
     stack.parse.add_optional(key="mongodb_username",default="null")
     stack.parse.add_optional(key="mongodb_password",default="null")
     stack.parse.add_optional(key="vm_username",default="ubuntu")
-    stack.parse.add_optional(key="bastion_hostname",default="null")
 
     stack.parse.add_optional(key="volume_mountpoint",default="/var/lib/mongodb")
     stack.parse.add_optional(key="volume_fstype",default="xfs")
@@ -22,8 +22,9 @@ def run(stackargs):
     # Add substack
     stack.add_substack('elasticdev:::create_mongodb_pem')
     stack.add_substack('elasticdev:::create_mongodb_keyfile')
-    stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_ubuntu')
     stack.add_substack('elasticdev:::_mongodb_replica_on_ubuntu_by_bastion_config')
+
+    #stack.add_substack('elasticdev:::_finalize_mongodb_replica_on_ubuntu')
 
     # Initialize 
     stack.init_variables()
@@ -63,20 +64,20 @@ def run(stackargs):
 
     inputargs = {"automation_phase":"infrastructure"}
 
+    human_description = 'Finalizing mongodb replica by bastion hostname {}'.format(stack.bastion_hostname)
+    default_values["volume_mountpoint"] = stack.volume_mountpoint
+    default_values["volume_fstype"] = stack.volume_fstype
+    default_values["bastion_hostname"] = stack.bastion_hostname
+    inputargs["default_values"] = default_values
+    inputargs["human_description"] = human_description
+    stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)
+
     # Testingyoyo
-    if stack.bastion_hostname:
-        human_description = 'Finalizing mongodb replica by bastion hostname {}'.format(stack.bastion_hostname)
-        if stack.volume_mountpoint: default_values["volume_mountpoint"] = stack.volume_mountpoint
-        if stack.volume_fstype: default_values["volume_fstype"] = stack.volume_fstype
-        default_values["bastion_hostname"] = stack.bastion_hostname
-        inputargs["default_values"] = default_values
-        inputargs["human_description"] = human_description
-        stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)
-    else:
-        human_description = 'Finalizing mongodb replica set and init'
-        default_values["config_network"] = stack.config_network
-        inputargs["default_values"] = default_values
-        inputargs["human_description"] = human_description
-        stack._finalize_mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
+    #if not stack.bastion_hostname:
+    #    human_description = 'Finalizing mongodb replica set and init'
+    #    default_values["config_network"] = stack.config_network
+    #    inputargs["default_values"] = default_values
+    #    inputargs["human_description"] = human_description
+    #    stack._finalize_mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
 
     return stack.get_results()

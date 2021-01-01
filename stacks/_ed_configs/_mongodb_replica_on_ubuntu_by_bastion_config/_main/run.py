@@ -1,4 +1,4 @@
-def _get_instance_info(hostname):
+def _get_instance_info(stack,hostname):
 
     _lookup = {"must_exists":True}
     _lookup["must_be_one"] = True
@@ -9,7 +9,7 @@ def _get_instance_info(hostname):
 
     return _info["instance_id"]
 
-def _get_volume_id(volume_name):
+def _get_volume_id(stack,volume_name):
 
     _lookup = {"must_exists":True}
     _lookup["must_be_one"] = True
@@ -61,6 +61,11 @@ def _get_mongodb_hosts(stack):
 
         _lookup["hostname"] = mongodb_host
         _host_info = list(stack.get_resource(**_lookup))[0]
+
+        # insert volume_name 
+        # ref 45304958324
+        _host_info["volume_name"] = "{}-{}".format(mongodb_host,stack.volume_mountpoint)
+
         mongodb_hosts_info.append(_host_info)
 
         stack.logger.debug_highlight('mongo hostname {}, found public_ip address "{}"'.format(mongodb_host,
@@ -83,6 +88,7 @@ def run(stackargs):
     stack.parse.add_required(key="mongodb_hosts")
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="ssh_keyname")
+    stack.parse.add_required(key="aws_default_region")
 
     stack.parse.add_optional(key="mongodb_username",default="_random")
     stack.parse.add_optional(key="mongodb_password",default="_random")
@@ -98,14 +104,17 @@ def run(stackargs):
 
     stack.parse.add_optional(key="volume_mountpoint",default="/var/lib/mongodb")
     stack.parse.add_optional(key="volume_fstype",default="xfs")
-    stack.parse.add_optional(key="docker_exec_env",default="elasticdev/ansible-run-env")
+    stack.parse.add_optional(key="device_name",default="/dev/xvdc")
+    stack.parse.add_optional(key="terraform_docker_exec_env",default="elasticdev/terraform-run-env")
+    stack.parse.add_optional(key="ansible_docker_exec_env",default="elasticdev/ansible-run-env")
 
     # Add Execution Group
     # Testingyoyo
     # ubuntu 18.04 - install docker with regular hostgroup and shell scripting
-    stack.add_hostgroups("elasticdev:::aws::config_vol","config_vol")
     stack.add_hostgroups("elasticdev:::ubuntu::18.04-docker","install_docker")
     stack.add_hostgroups("elasticdev:::ansible::ubuntu-18.04","install_python")
+    stack.add_hostgroups("elasticdev:::aws::attach_volume_to_ec2","attach_volume_to_ec2")
+    stack.add_hostgroups("elasticdev:::aws::config_vol","config_vol")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_setup","ubuntu_vendor_setup")
     stack.add_hostgroups("elasticdev:::mongodb::ubuntu_vendor_init_replica","ubuntu_vendor_init_replica")
 
@@ -133,50 +142,82 @@ def run(stackargs):
     inputargs["groups"] = stack.install_docker
     stack.add_groups_to_host(**inputargs)
 
+    # install python on mongodb_hosts
+    env_vars = {"METHOD":"create"}
+    env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+    env_vars["ANS_VAR_private_key"] = private_key
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/10-install-python.yml"
+    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
+    env_vars["ANS_VAR_host_ips"] = ",".join(private_ips)
+
+    inputargs = {"display":True}
+    inputargs["human_description"] = 'Install Python for Ansible'
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.install_python
+    stack.add_groups_to_host(**inputargs)
+
     # mount volumes on mongodb_hosts
     # install mongodb on mongodb_hosts
 
     for mongodb_host_info in mongodb_hosts_info:
 
-        # install python on mongodb_hosts
-        env_vars = {"METHOD":"create"}
+        # Call to create the server with shellout script
+        env_vars = {"AWS_DEFAULT_REGION":stack.aws_default_region}
         env_vars["STATEFUL_ID"] = stack.random_id(size=10)
-        env_vars["ANS_VAR_private_key"] = private_key
-        env_vars["ANS_VAR_exec_ymls"] = "entry_point/10-install-python.yml"
-        env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-        env_vars["ANS_VAR_host_ips"] = mongodb_host_info["private_ip"]
+ 
+        instance_id = _get_instance_info(stack,mongodb_host_info["hostname"])
 
+        env_vars["TF_VAR_aws_default_region"] = stack.aws_default_region
+        env_vars["TF_VAR_device_name"] = stack.device_name
+        env_vars["TF_VAR_instance_id"] = instance_id
+        env_vars["TF_VAR_volume_id"] = _get_volume_id(stack,mongodb_host_info["volume_name"])
+        env_vars["docker_exec_env".upper()] = stack.terraform_docker_exec_env
+        env_vars["resource_type".upper()] = "ebs_volume_attach"
+        env_vars["RESOURCE_TAGS"] = "{},{},{},{},{}".format("ebs","ebs_attach", "aws", stack.volume_id, stack.aws_default_region)
+        env_vars["METHOD"] = "create"
+        env_vars["use_docker".upper()] = True
+  
+        _docker_env_fields_keys = env_vars.keys()
+        _docker_env_fields_keys.append("AWS_ACCESS_KEY_ID")
+        _docker_env_fields_keys.append("AWS_SECRET_ACCESS_KEY")
+        _docker_env_fields_keys.append("AWS_DEFAULT_REGION")
+        _docker_env_fields_keys.remove("METHOD")
+        env_vars["DOCKER_ENV_FIELDS"] = ",".join(_docker_env_fields_keys)
+  
         inputargs = {"display":True}
-        inputargs["human_description"] = 'Install Python for Ansible'
+        inputargs["human_description"] = 'Attaches ebs volume to instance_id "{}"'.format(instance_id)
         inputargs["env_vars"] = json.dumps(env_vars)
         inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
         inputargs["automation_phase"] = "infrastructure"
-        inputargs["hostname"] = stack.bastion_hostname
-        inputargs["groups"] = stack.install_python
-        stack.add_groups_to_host(**inputargs)
+        #if stack.tags: inputargs["tags"] = stack.tags
+        #if stack.labels: inputargs["labels"] = stack.labels
+        stack.attach_volume_to_ec2.insert(**inputargs)
 
-        # mount volumes
-        human_description = 'Format and mount volume on mongodb_host "{}" fstype {} mountpoint {}'.format(mongodb_host_info["hostname"],
-                                                                                                          stack.volume_fstype,
-                                                                                                          stack.volume_mountpoint)
-        inputargs = {"display":True}
-        env_vars = {"METHOD":"create"}
-        env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-        env_vars["STATEFUL_ID"] = stack.random_id(size=10)
-        env_vars["ANS_VAR_volume_fstype"] = stack.volume_fstype
-        env_vars["ANS_VAR_volume_mountpoint"] = stack.volume_mountpoint
-        env_vars["ANS_VAR_private_key"] = private_key
-        env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-format.yml,entry_point/30-mount.yml"
-        env_vars["ANS_VAR_host_ips"] = mongodb_host_info["private_ip"]
+    # mount volumes
+    human_description = 'Format and mount volume on mongodb hosts fstype {} mountpoint {}'.format(stack.volume_fstype,
+                                                                                                  stack.volume_mountpoint)
+    inputargs = {"display":True}
+    env_vars = {"METHOD":"create"}
+    env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
+    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
+    env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+    env_vars["ANS_VAR_volume_fstype"] = stack.volume_fstype
+    env_vars["ANS_VAR_volume_mountpoint"] = stack.volume_mountpoint
+    env_vars["ANS_VAR_private_key"] = private_key
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-format.yml,entry_point/30-mount.yml"
+    env_vars["ANS_VAR_host_ips"] = ",".join(private_ips)
 
-        inputargs["human_description"] = human_description
-        inputargs["env_vars"] = json.dumps(env_vars)
-        inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
-        inputargs["automation_phase"] = "infrastructure"
-        inputargs["hostname"] = stack.bastion_hostname
-        inputargs["groups"] = stack.config_vol
+    inputargs["human_description"] = human_description
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.config_vol
 
-        stack.add_groups_to_host(**inputargs)
+    stack.add_groups_to_host(**inputargs)
 
     return stack.get_results()
 
@@ -211,7 +252,7 @@ def run(stackargs):
     #env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
     #env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
     #env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-    #env_vars["docker_exec_env".upper()] = stack.docker_exec_env
+    #env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
     #env_vars["use_docker".upper()] = True
     #env_vars["METHOD"] = "create"
 
