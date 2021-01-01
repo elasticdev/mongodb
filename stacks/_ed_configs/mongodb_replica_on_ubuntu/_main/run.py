@@ -8,6 +8,7 @@ def run(stackargs):
     stack.parse.add_required(key="mongodb_cluster")
     stack.parse.add_required(key="ssh_keyname")
     stack.parse.add_required(key="bastion_hostname")
+    stack.parse.add_required(key="aws_default_region")
 
     # This will be public_main/private_main
     stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
@@ -68,6 +69,8 @@ def run(stackargs):
     default_values["volume_mountpoint"] = stack.volume_mountpoint
     default_values["volume_fstype"] = stack.volume_fstype
     default_values["bastion_hostname"] = stack.bastion_hostname
+    default_values["aws_default_region"] = stack.aws_default_region
+
     inputargs["default_values"] = default_values
     inputargs["human_description"] = human_description
     stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)

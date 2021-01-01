@@ -120,6 +120,8 @@ def run(stackargs):
     default_values["ssh_keyname"] = stack.ssh_keyname
     default_values["mongodb_hosts"] = mongodb_hosts
     default_values["config_network"] = stack.config_network
+    default_values["aws_default_region"] = stack.aws_default_region
+
     if stack.mongodb_username: default_values["mongodb_username"] = stack.mongodb_username
     if stack.mongodb_password: default_values["mongodb_password"] = stack.mongodb_password
     if stack.vm_username: default_values["vm_username"] = stack.vm_username
