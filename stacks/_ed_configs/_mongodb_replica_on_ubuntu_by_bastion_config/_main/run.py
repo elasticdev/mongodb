@@ -192,9 +192,9 @@ def run(stackargs):
         inputargs["env_vars"] = json.dumps(env_vars)
         inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
         inputargs["automation_phase"] = "infrastructure"
-        #if stack.tags: inputargs["tags"] = stack.tags
-        #if stack.labels: inputargs["labels"] = stack.labels
-        stack.attach_volume_to_ec2.insert(**inputargs)
+        inputargs["hostname"] = stack.bastion_hostname
+        inputargs["groups"] = stack.attach_volume_to_ec2
+        stack.add_groups_to_host(**inputargs)
 
     # mount volumes
     human_description = 'Format and mount volume on mongodb hosts fstype {} mountpoint {}'.format(stack.volume_fstype,
