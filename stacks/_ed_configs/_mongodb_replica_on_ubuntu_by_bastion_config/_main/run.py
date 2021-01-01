@@ -176,7 +176,7 @@ def run(stackargs):
         env_vars["TF_VAR_volume_id"] = _get_volume_id(stack,mongodb_host_info["volume_name"])
         env_vars["docker_exec_env".upper()] = stack.terraform_docker_exec_env
         env_vars["resource_type".upper()] = "ebs_volume_attach"
-        env_vars["RESOURCE_TAGS"] = "{},{},{},{},{}".format("ebs","ebs_attach", "aws", stack.volume_id, stack.aws_default_region)
+        env_vars["RESOURCE_TAGS"] = "{},{},{},{},{}".format("ebs","ebs_attach", "aws", stack.aws_default_region)
         env_vars["METHOD"] = "create"
         env_vars["use_docker".upper()] = True
   
