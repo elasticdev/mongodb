@@ -104,7 +104,7 @@ def run(stackargs):
         default_values["register_to_ed"] = None
         default_values["volume_size"] = stack.volume_size
         # ref 45304958324
-        default_values["volume_name"] = "{}-{}".format(hostname,stack.volume_mountpoint)
+        default_values["volume_name"] = "{}-{}".format(hostname,stack.volume_mountpoint).replace("/","-").replace(".","-")
 
         inputargs = {"default_values":default_values}
         human_description = "Creating hostname {} on ec2".format(hostname)
