@@ -64,7 +64,7 @@ def _get_mongodb_hosts(stack):
 
         # insert volume_name 
         # ref 45304958324
-        _host_info["volume_name"] = "{}-{}".format(mongodb_host,stack.volume_mountpoint)
+        _host_info["volume_name"] = "{}-{}".format(mongodb_host,stack.volume_mountpoint).replace("/","-").replace(".","-")
 
         mongodb_hosts_info.append(_host_info)
 
