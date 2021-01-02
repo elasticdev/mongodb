@@ -79,32 +79,27 @@ class Main(ResourceCmdHelper):
         self.config_file_path = "{}/hosts".format(self.exec_dir)
         self.config_file = open(self.config_file_path,"w")
 
-    def _write_file(self,key,filepath):
-
-        if not self.inputargs.get(key): return
-
-        with open(filepath,"wb") as wfile:
-            for _line in self.inputargs[key].split('\\n'):
-                wfile.write(_line)
-                wfile.write("\n")
-
     def _create_mongodb_keyfile(self):
 
         filepath = os.path.join(self.exec_dir,"roles","init_replica_nodes","files","mongodb_keyfile")
-        self._write_file("mongodb_keyfile",filepath)
+
+        self.write_key_to_file(key="mongodb_keyfile",
+                               filepath=filepath,
+                               split_char="return",
+                               add_return=True,
+                               permission=400)
+
         #os.system("chmod 400 {}".format(filepath))
 
     def _create_mongodb_pem(self):
 
         filepath = os.path.join(self.exec_dir,"roles","init_replica_nodes","files","mongodb.pem")
-        self._write_file("mongodb_pem",filepath)
-        os.system("chmod 400 {}".format(filepath))
-        
-    def _create_ssh_key(self):
 
-        filepath = "{}/ssh_key.pem".format(self.exec_dir)
-        self._write_file("private_key",filepath)
-        os.system("chmod 400 {}".format(filepath))
+        self.write_key_to_file(key="mongodb_pem",
+                               filepath=filepath,
+                               split_char="return",
+                               add_return=True,
+                               permission=400)
         
     def _add_public(self):
 
@@ -173,7 +168,6 @@ class Main(ResourceCmdHelper):
         # update and clobber vars all and hosts
         self.templify(clobber=True)
 
-        self._create_ssh_key()
         self._create_mongodb_keyfile()
         self._create_mongodb_pem()
         self._add_public()

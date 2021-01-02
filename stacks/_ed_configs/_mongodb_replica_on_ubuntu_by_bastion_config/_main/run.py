@@ -234,15 +234,17 @@ def run(stackargs):
     # Testingyoyo
 
     ###############################################################
-    # Setup Ansible for MongoDb
-    # templify ansible and create necessary files
+    # standard env variables for creating the mongodb cluster
+    # they will all use the same stateful_id since the files
+    # don't change.
     ###############################################################
-    human_description = "Setting up Ansible for MongoDb"
+
+    stateful_id = stack.random_id(size=10)
 
     env_vars = {"METHOD":"create"}
     env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-    env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+    env_vars["STATEFUL_ID"] = stateful_id
     env_vars["ANS_VAR_mongodb_pem"] = mongodb_pem
     env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
     env_vars["ANS_VAR_private_key"] = private_key
@@ -262,10 +264,16 @@ def run(stackargs):
 
     #inputargs["name"] = stack.mongodb_cluster
 
+    ###############################################################
+    # deploy files Ansible for MongoDb
+    ###############################################################
+
+    human_description = "Setting up Ansible for MongoDb"
+
     inputargs = {"display":True}
     inputargs["human_description"] = human_description
     inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
     inputargs["groups"] = stack.ubuntu_vendor_setup
@@ -277,8 +285,6 @@ def run(stackargs):
     ###############################################################
     human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
 
-    #inputargs["name"] = stack.mongodb_cluster
-
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -286,7 +292,7 @@ def run(stackargs):
     inputargs = {"display":True}
     inputargs["human_description"] = human_description
     inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
     inputargs["groups"] = stack.ubuntu_vendor_setup
@@ -298,8 +304,6 @@ def run(stackargs):
     ###############################################################
     human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
 
-    #inputargs["name"] = stack.mongodb_cluster
-
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -307,7 +311,7 @@ def run(stackargs):
     inputargs = {"display":True}
     inputargs["human_description"] = human_description
     inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
     inputargs["groups"] = stack.ubuntu_vendor_setup
@@ -328,7 +332,7 @@ def run(stackargs):
     inputargs = {"display":True}
     inputargs["human_description"] = human_description
     inputargs["env_vars"] = json.dumps(env_vars)
-    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
     inputargs["groups"] = stack.ubuntu_vendor_setup
