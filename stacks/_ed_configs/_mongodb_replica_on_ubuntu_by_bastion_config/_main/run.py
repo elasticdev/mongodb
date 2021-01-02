@@ -162,6 +162,7 @@ def run(stackargs):
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
     inputargs["groups"] = stack.install_python
+
     stack.add_groups_to_host(**inputargs)
 
     # mount volumes on mongodb_hosts
@@ -283,8 +284,12 @@ def run(stackargs):
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
 
     inputargs = {"display":True}
-    inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = human_description
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.ubuntu_vendor_setup
 
     stack.add_groups_to_host(**inputargs)
 
@@ -300,8 +305,12 @@ def run(stackargs):
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
 
     inputargs = {"display":True}
-    inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = human_description
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.ubuntu_vendor_setup
 
     stack.add_groups_to_host(**inputargs)
 
@@ -317,8 +326,12 @@ def run(stackargs):
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
 
     inputargs = {"display":True}
-    inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = human_description
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.ubuntu_vendor_setup
 
     stack.add_groups_to_host(**inputargs)
 
