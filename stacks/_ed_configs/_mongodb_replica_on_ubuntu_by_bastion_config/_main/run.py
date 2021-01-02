@@ -254,13 +254,16 @@ def run(stackargs):
     base_env_vars["ANS_VAR_mongodb_storage_engine"] = stack.mongodb_storage_engine
     base_env_vars["ANS_VAR_mongodb_bind_ip"] = stack.mongodb_bind_ip
     base_env_vars["ANS_VAR_mongodb_logpath"] = stack.mongodb_logpath
-    base_env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
-    base_env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
-    base_env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
     base_env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
     base_env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
     base_env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
     base_env_vars["ANS_VAR_mongodb_cluster"] = stack.mongodb_cluster
+    base_env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
+    base_env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
+    base_env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
+
+    # This is the configuration ips that bastion hosts will connect
+    base_env_vars["ANS_VAR_mongodb_config_ips"] = ",".join(private_ips)
 
     #inputargs["name"] = stack.mongodb_cluster
 

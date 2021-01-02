@@ -45,6 +45,7 @@ class Main(ResourceCmdHelper):
                          "ANS_VAR_mongodb_config_network",
                          "ANS_VAR_mongodb_public_ips",
                          "ANS_VAR_mongodb_private_ips",
+                         "ANS_VAR_mongodb_config_ips",
                          "method" ]
 
         self.set_inputargs(set_env_vars=set_env_vars,upper_case=None)
@@ -59,6 +60,7 @@ class Main(ResourceCmdHelper):
 
         self.public_ips = self.inputargs["mongodb_public_ips"].split(",")
         self.private_ips = self.inputargs["mongodb_private_ips"].split(",")
+        self.config_ips = self.inputargs["mongodb_config_ips"].split(",")
         self.config_network = self.inputargs["mongodb_config_network"]
 
         self.clobber = self.inputargs.get("clobber",True)
@@ -107,6 +109,28 @@ class Main(ResourceCmdHelper):
         self.config_file.write("\n")
 
         for _ip in self.public_ips:
+            self.config_file.write(_ip)
+            self.config_file.write("\n")
+
+        self.config_file.write("\n")
+
+    def _add_private(self):
+
+        self.config_file.write('[private]')
+        self.config_file.write("\n")
+
+        for _ip in self.private_ips:
+            self.config_file.write(_ip)
+            self.config_file.write("\n")
+
+        self.config_file.write("\n")
+
+    def _add_config_ips(self):
+
+        self.config_file.write('[configuration]')
+        self.config_file.write("\n")
+
+        for _ip in self.config_ips:
             self.config_file.write(_ip)
             self.config_file.write("\n")
 
@@ -171,6 +195,8 @@ class Main(ResourceCmdHelper):
         self._create_mongodb_keyfile()
         self._create_mongodb_pem()
         self._add_public()
+        self._add_private()
+        self._add_config_ips()
         self._add_config_network()
         self._add_main()
         self._add_secondaries()
@@ -202,6 +228,7 @@ environmental variables:
         ANS_VAR_mongodb_config_network
         ANS_VAR_mongodb_public_ips
         ANS_VAR_mongodb_private_ips
+        ANS_VAR_mongodb_config_ips
         method
 
        """
@@ -218,7 +245,7 @@ if __name__ == '__main__':
 
     if main.inputargs.get("method","create") == "create":
 
-        main.check_required_inputargs(keys=["mongodb_public_ips","mongodb_private_ips"])
+        main.check_required_inputargs(keys=["mongodb_public_ips","mongodb_private_ips","mongodb_config_ips"])
         main.create()
 
     else:

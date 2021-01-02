@@ -1,6 +1,6 @@
 ---
 - name: install
-  hosts: public
+  hosts: configuration
   roles:
     - role: ../roles/mongodb
       mongodb_repl_set_name: rs0
