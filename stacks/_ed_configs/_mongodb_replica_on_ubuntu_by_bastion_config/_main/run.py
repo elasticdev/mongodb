@@ -333,4 +333,4 @@ def run(stackargs):
 
     stack.publish(_publish_vars)
 
-   return stack.get_results()
+    return stack.get_results()
