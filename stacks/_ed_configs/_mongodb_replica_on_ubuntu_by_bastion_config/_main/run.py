@@ -210,7 +210,6 @@ def run(stackargs):
     # mount volumes
     human_description = 'Format and mount volume on mongodb hosts fstype {} mountpoint {}'.format(stack.volume_fstype,
                                                                                                   stack.volume_mountpoint)
-    inputargs = {"display":True}
     env_vars = {"METHOD":"create"}
     env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
     env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
@@ -221,6 +220,7 @@ def run(stackargs):
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-format.yml,entry_point/30-mount.yml"
     env_vars["ANS_VAR_host_ips"] = ",".join(private_ips)
 
+    inputargs = {"display":True}
     inputargs["human_description"] = human_description
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
@@ -237,9 +237,12 @@ def run(stackargs):
     # templify ansible and create necessary files
     ###############################################################
     human_description = "Setting up Ansible for MongoDb"
-    inputargs = {"display":True}
 
-    env_vars = {"ANS_VAR_mongodb_pem":mongodb_pem}
+    env_vars = {"METHOD":"create"}
+    env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
+    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
+    env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+    env_vars["ANS_VAR_mongodb_pem"] = mongodb_pem
     env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
     env_vars["ANS_VAR_private_key"] = private_key
     env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
@@ -254,65 +257,70 @@ def run(stackargs):
     env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
     env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
     env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
-    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-    env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
-    env_vars["use_docker".upper()] = True
-    env_vars["METHOD"] = "create"
+    env_vars["ANS_VAR_mongodb_cluster"] = stack.mongodb_cluster
 
-    env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+    #inputargs["name"] = stack.mongodb_cluster
+
+    inputargs = {"display":True}
+    inputargs["human_description"] = human_description
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.ubuntu_vendor_setup
 
-    inputargs["name"] = stack.mongodb_cluster
-    inputargs["human_description"] = human_description
-    stack.add_groups_to_host(groups=stack.ubuntu_vendor_setup,hostname=stack.bastion_hostname)
+    stack.add_groups_to_host(**inputargs)
 
     ###############################################################
     # mongo install and setup
     ###############################################################
     human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
 
-    inputargs = {"display":True}
-    inputargs["name"] = stack.mongodb_cluster
+    #inputargs["name"] = stack.mongodb_cluster
 
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = human_description
-    stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
+
+    stack.add_groups_to_host(**inputargs)
 
     ###############################################################
     # mongo init replica
     ###############################################################
     human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
 
-    inputargs = {"display":True}
-    inputargs["name"] = stack.mongodb_cluster
+    #inputargs["name"] = stack.mongodb_cluster
 
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
     docker_env_fields_keys = env_vars.keys()
-
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = human_description
-    stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
+
+    stack.add_groups_to_host(**inputargs)
 
     ###############################################################
     # add slave replica nodes
     ###############################################################
     human_description = "Add slave nodes to the master node"
 
-    inputargs = {"display":True}
-    inputargs["name"] = stack.mongodb_cluster
+    #inputargs["name"] = stack.mongodb_cluster
 
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/40-mongo-add-slave-replica.yml"
     docker_env_fields_keys = env_vars.keys()
-
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    inputargs = {"display":True}
     inputargs["env_vars"] = json.dumps(env_vars)
     inputargs["human_description"] = human_description
-    stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
+
+    stack.add_groups_to_host(**inputargs)
 
     ###############################################################
     # publish variables
