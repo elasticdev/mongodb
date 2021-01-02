@@ -230,16 +230,8 @@ def run(stackargs):
 
     stack.add_groups_to_host(**inputargs)
 
-    return stack.get_results()
+    # Testingyoyo
 
-    ################################################################
-    ## Testing one change at a time below
-    ################################################################
-    ## Testingyoyo
-    ## Testingyoyo
-    ## Testingyoyo
-    ## Testingyoyo
-    ## Testingyoyo
     ###############################################################
     # Setup Ansible for MongoDb
     # templify ansible and create necessary files
@@ -340,9 +332,5 @@ def run(stackargs):
         _publish_vars["mongodb_password"] = stack.mongodb_password
 
     stack.publish(_publish_vars)
-    ## Testingyoyo
-    ## Testingyoyo
-    ## Testingyoyo
-    ## Testingyoyo
 
-    #return stack.get_results()
+   return stack.get_results()
