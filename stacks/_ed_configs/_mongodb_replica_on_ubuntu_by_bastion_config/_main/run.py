@@ -296,7 +296,7 @@ def run(stackargs):
     inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
-    inputargs["groups"] = stack.ubuntu_vendor_setup
+    inputargs["groups"] = stack.ubuntu_vendor_init_replica
 
     stack.add_groups_to_host(**inputargs)
 
@@ -316,7 +316,7 @@ def run(stackargs):
     inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
-    inputargs["groups"] = stack.ubuntu_vendor_setup
+    inputargs["groups"] = stack.ubuntu_vendor_init_replica
 
     stack.add_groups_to_host(**inputargs)
 
@@ -338,7 +338,7 @@ def run(stackargs):
     inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
-    inputargs["groups"] = stack.ubuntu_vendor_setup
+    inputargs["groups"] = stack.ubuntu_vendor_init_replica
 
     stack.add_groups_to_host(**inputargs)
 
