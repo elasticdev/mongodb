@@ -240,72 +240,55 @@ def run(stackargs):
     ## Testingyoyo
     ## Testingyoyo
     ## Testingyoyo
-    ################################################################
-    ## Setup Ansible for MongoDb
-    ## templify ansible and create necessary files
-    ################################################################
-    #human_description = "Setting up Ansible for MongoDb"
-    #inputargs = {"display":True}
+    ###############################################################
+    # Setup Ansible for MongoDb
+    # templify ansible and create necessary files
+    ###############################################################
+    human_description = "Setting up Ansible for MongoDb"
+    inputargs = {"display":True}
 
-    #env_vars = {"ANS_VAR_mongodb_pem":mongodb_pem}
-    #env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
-    #env_vars["ANS_VAR_private_key"] = private_key
-    #env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
-    #env_vars["ANS_VAR_mongodb_port"] = stack.mongodb_port
-    #env_vars["ANS_VAR_mongodb_data_dir"] = stack.mongodb_data_dir
-    #env_vars["ANS_VAR_mongodb_storage_engine"] = stack.mongodb_storage_engine
-    #env_vars["ANS_VAR_mongodb_bind_ip"] = stack.mongodb_bind_ip
-    #env_vars["ANS_VAR_mongodb_logpath"] = stack.mongodb_logpath
-    #env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
-    #env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
-    #env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
-    #env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
-    #env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
-    #env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
-    #env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-    #env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
-    #env_vars["use_docker".upper()] = True
-    #env_vars["METHOD"] = "create"
+    env_vars = {"ANS_VAR_mongodb_pem":mongodb_pem}
+    env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
+    env_vars["ANS_VAR_private_key"] = private_key
+    env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
+    env_vars["ANS_VAR_mongodb_port"] = stack.mongodb_port
+    env_vars["ANS_VAR_mongodb_data_dir"] = stack.mongodb_data_dir
+    env_vars["ANS_VAR_mongodb_storage_engine"] = stack.mongodb_storage_engine
+    env_vars["ANS_VAR_mongodb_bind_ip"] = stack.mongodb_bind_ip
+    env_vars["ANS_VAR_mongodb_logpath"] = stack.mongodb_logpath
+    env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
+    env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
+    env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
+    env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
+    env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
+    env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
+    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
+    env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
+    env_vars["use_docker".upper()] = True
+    env_vars["METHOD"] = "create"
 
-    #env_vars["STATEFUL_ID"] = stack.random_id(size=10)
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    env_vars["STATEFUL_ID"] = stack.random_id(size=10)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
 
-    #inputargs["name"] = stack.mongodb_cluster
-    #inputargs["human_description"] = human_description
-    #stack.add_groups_to_host(groups=stack.ubuntu_vendor_setup,hostname=stack.bastion_hostname)
+    inputargs["name"] = stack.mongodb_cluster
+    inputargs["human_description"] = human_description
+    stack.add_groups_to_host(groups=stack.ubuntu_vendor_setup,hostname=stack.bastion_hostname)
 
-    ################################################################
-    ## installing python
-    ################################################################
-    #human_description = "Installing python (for Ansible) to mongodb nodes"
-    #inputargs = {"display":True}
-    #inputargs["name"] = stack.mongodb_cluster
+    ###############################################################
+    # mongo install and setup
+    ###############################################################
+    human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
 
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/10-install-python.yml"
-    #env_vars["STATEFUL_ID"] = stack.random_id(size=10)
-    #inputargs["stateful_id"] = env_vars["STATEFUL_ID"]
+    inputargs = {"display":True}
+    inputargs["name"] = stack.mongodb_cluster
 
-    #docker_env_fields_keys = env_vars.keys()
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["human_description"] = human_description
-    #stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
-
-    ################################################################
-    ## mongo install and setup
-    ################################################################
-    #human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
-
-    #inputargs = {"display":True}
-    #inputargs["name"] = stack.mongodb_cluster
-
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
-    #docker_env_fields_keys = env_vars.keys()
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["human_description"] = human_description
-    #stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
+    docker_env_fields_keys = env_vars.keys()
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = human_description
+    stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
 
     ################################################################
     ## mongo init replica
