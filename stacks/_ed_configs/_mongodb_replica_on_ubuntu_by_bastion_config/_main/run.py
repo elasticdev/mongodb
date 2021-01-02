@@ -290,56 +290,56 @@ def run(stackargs):
     inputargs["human_description"] = human_description
     stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
 
-    ################################################################
-    ## mongo init replica
-    ################################################################
-    #human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
+    ###############################################################
+    # mongo init replica
+    ###############################################################
+    human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
 
-    #inputargs = {"display":True}
-    #inputargs["name"] = stack.mongodb_cluster
+    inputargs = {"display":True}
+    inputargs["name"] = stack.mongodb_cluster
 
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
-    #docker_env_fields_keys = env_vars.keys()
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
+    docker_env_fields_keys = env_vars.keys()
 
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["human_description"] = human_description
-    #stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = human_description
+    stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
 
-    ################################################################
-    ## add slave replica nodes
-    ################################################################
-    #human_description = "Add slave nodes to the master node"
+    ###############################################################
+    # add slave replica nodes
+    ###############################################################
+    human_description = "Add slave nodes to the master node"
 
-    #inputargs = {"display":True}
-    #inputargs["name"] = stack.mongodb_cluster
+    inputargs = {"display":True}
+    inputargs["name"] = stack.mongodb_cluster
 
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/40-mongo-add-slave-replica.yml"
-    #docker_env_fields_keys = env_vars.keys()
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/40-mongo-add-slave-replica.yml"
+    docker_env_fields_keys = env_vars.keys()
 
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["human_description"] = human_description
-    #stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["human_description"] = human_description
+    stack.add_groups_to_host(groups=stack.ubuntu_vendor_init_replica,hostname=stack.bastion_hostname)
 
-    ################################################################
-    ## publish variables
-    ################################################################
-    #_publish_vars = {"mongodb_cluster":stack.mongodb_cluster}
-    #_publish_vars["mongodb_version"] = stack.mongodb_version
-    #_publish_vars["mongodb_port"] = stack.mongodb_port
-    #_publish_vars["mongodb_data_dir"] = stack.mongodb_data_dir
-    #_publish_vars["mongodb_storage_engine"] = stack.mongodb_storage_engine
-    #_publish_vars["mongodb_bind_ip"] = stack.mongodb_bind_ip
-    #_publish_vars["mongodb_logpath"] = stack.mongodb_logpath
-    #_publish_vars["mongodb_public_ips"] = ",".join(public_ips)
-    #_publish_vars["mongodb_private_ips"] = ",".join(private_ips)
+    ###############################################################
+    # publish variables
+    ###############################################################
+    _publish_vars = {"mongodb_cluster":stack.mongodb_cluster}
+    _publish_vars["mongodb_version"] = stack.mongodb_version
+    _publish_vars["mongodb_port"] = stack.mongodb_port
+    _publish_vars["mongodb_data_dir"] = stack.mongodb_data_dir
+    _publish_vars["mongodb_storage_engine"] = stack.mongodb_storage_engine
+    _publish_vars["mongodb_bind_ip"] = stack.mongodb_bind_ip
+    _publish_vars["mongodb_logpath"] = stack.mongodb_logpath
+    _publish_vars["mongodb_public_ips"] = ",".join(public_ips)
+    _publish_vars["mongodb_private_ips"] = ",".join(private_ips)
 
-    #if stack.publish_creds:
-    #    _publish_vars["mongodb_username"] = stack.mongodb_username
-    #    _publish_vars["mongodb_password"] = stack.mongodb_password
+    if stack.publish_creds:
+        _publish_vars["mongodb_username"] = stack.mongodb_username
+        _publish_vars["mongodb_password"] = stack.mongodb_password
 
-    #stack.publish(_publish_vars)
+    stack.publish(_publish_vars)
     ## Testingyoyo
     ## Testingyoyo
     ## Testingyoyo
