@@ -241,26 +241,26 @@ def run(stackargs):
 
     stateful_id = stack.random_id(size=10)
 
-    env_vars = {"METHOD":"create"}
-    env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
-    env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
-    env_vars["STATEFUL_ID"] = stateful_id
-    env_vars["ANS_VAR_mongodb_pem"] = mongodb_pem
-    env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
-    env_vars["ANS_VAR_private_key"] = private_key
-    env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
-    env_vars["ANS_VAR_mongodb_port"] = stack.mongodb_port
-    env_vars["ANS_VAR_mongodb_data_dir"] = stack.mongodb_data_dir
-    env_vars["ANS_VAR_mongodb_storage_engine"] = stack.mongodb_storage_engine
-    env_vars["ANS_VAR_mongodb_bind_ip"] = stack.mongodb_bind_ip
-    env_vars["ANS_VAR_mongodb_logpath"] = stack.mongodb_logpath
-    env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
-    env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
-    env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
-    env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
-    env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
-    env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
-    env_vars["ANS_VAR_mongodb_cluster"] = stack.mongodb_cluster
+    base_env_vars = {"METHOD":"create"}
+    base_env_vars["docker_exec_env".upper()] = stack.ansible_docker_exec_env
+    base_env_vars["ANSIBLE_DIR"] = "/var/tmp/ansible"
+    base_env_vars["STATEFUL_ID"] = stateful_id
+    base_env_vars["ANS_VAR_mongodb_pem"] = mongodb_pem
+    base_env_vars["ANS_VAR_mongodb_keyfile"] = mongodb_keyfile
+    base_env_vars["ANS_VAR_private_key"] = private_key
+    base_env_vars["ANS_VAR_mongodb_version"] = stack.mongodb_version
+    base_env_vars["ANS_VAR_mongodb_port"] = stack.mongodb_port
+    base_env_vars["ANS_VAR_mongodb_data_dir"] = stack.mongodb_data_dir
+    base_env_vars["ANS_VAR_mongodb_storage_engine"] = stack.mongodb_storage_engine
+    base_env_vars["ANS_VAR_mongodb_bind_ip"] = stack.mongodb_bind_ip
+    base_env_vars["ANS_VAR_mongodb_logpath"] = stack.mongodb_logpath
+    base_env_vars["ANS_VAR_mongodb_public_ips"] = ",".join(public_ips)
+    base_env_vars["ANS_VAR_mongodb_private_ips"] = ",".join(private_ips)
+    base_env_vars["ANS_VAR_mongodb_main_ips"] = "{},{}".format(public_ips[0],private_ips[0])
+    base_env_vars["ANS_VAR_mongodb_username"] = stack.mongodb_username
+    base_env_vars["ANS_VAR_mongodb_password"] = stack.mongodb_password
+    base_env_vars["ANS_VAR_mongodb_config_network"] = private_ips[0]
+    base_env_vars["ANS_VAR_mongodb_cluster"] = stack.mongodb_cluster
 
     #inputargs["name"] = stack.mongodb_cluster
 
@@ -272,7 +272,7 @@ def run(stackargs):
 
     inputargs = {"display":True}
     inputargs["human_description"] = human_description
-    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["env_vars"] = json.dumps(base_env_vars.copy())
     inputargs["stateful_id"] = stateful_id
     inputargs["automation_phase"] = "infrastructure"
     inputargs["hostname"] = stack.bastion_hostname
@@ -285,6 +285,7 @@ def run(stackargs):
     ###############################################################
     human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
 
+    env_vars = base_env_vars.copy()
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -304,6 +305,7 @@ def run(stackargs):
     ###############################################################
     human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
 
+    env_vars = base_env_vars.copy()
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
@@ -325,6 +327,7 @@ def run(stackargs):
 
     #inputargs["name"] = stack.mongodb_cluster
 
+    env_vars = base_env_vars.copy()
     env_vars["ANS_VAR_exec_ymls"] = "entry_point/40-mongo-add-slave-replica.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
