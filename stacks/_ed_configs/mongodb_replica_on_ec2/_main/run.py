@@ -133,7 +133,9 @@ def run(stackargs):
     inputargs["human_description"] = human_description
     stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
 
+    # destroy bastion config after replica completes
     if stack.bastion_config_destroy:
+
         _destroy_values = { "hostname":stack.bastion_hostname,
                             "resource_type":"server",
                             "region":"server",
