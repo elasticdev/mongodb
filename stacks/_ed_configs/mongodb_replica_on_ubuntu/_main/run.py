@@ -75,7 +75,7 @@ def run(stackargs):
     inputargs["human_description"] = human_description
     stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)
 
-    # Testingyoyo
+    # This was previously used for configuring without a bastion config node.
     #if not stack.bastion_hostname:
     #    human_description = 'Finalizing mongodb replica set and init'
     #    default_values["config_network"] = stack.config_network

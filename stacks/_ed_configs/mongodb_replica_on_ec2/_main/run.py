@@ -8,7 +8,6 @@ def run(stackargs):
     stack.parse.add_required(key="num_of_replicas",default="1")
     stack.parse.add_required(key="ssh_keyname")
 
-    # Testingyoyo
     # This will be public_main/private_main
     stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
 
@@ -23,12 +22,11 @@ def run(stackargs):
     stack.parse.add_optional(key="bastion_subnet",default="private")
     stack.parse.add_optional(key="bastion_image",default="ami-06fb5332e8e3e577a")
 
-    # Testingyoyo
-    #stack.parse.add_required(key="image")
-    #stack.parse.add_required(key="aws_default_region",default="us-east-1")
+    # destroy bastion config
+    stack.parse.add_optional(key="bastion_config_destroy",default="null")
 
     stack.parse.add_required(key="image",default="ami-06fb5332e8e3e577a")
-    stack.parse.add_required(key="aws_default_region",default="ap-southeast-1")
+    stack.parse.add_required(key="aws_default_region",default="us-east-1")
 
     stack.parse.add_optional(key="security_groups",default="null")
     stack.parse.add_optional(key="vpc_name",default="null")
@@ -62,7 +60,6 @@ def run(stackargs):
     else:
         hostname_base = "{}-replica".format(stack.mongodb_cluster)
 
-    # Testingyoyo
     # Set up bastion configuration host
     stack.set_variable("bastion_hostname","{}-config".format(hostname_base))
 
@@ -135,5 +132,13 @@ def run(stackargs):
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
     stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
+
+    if stack.bastion_config_destroy:
+        _destroy_values = { "hostname":stack.bastion_hostname,
+                            "resource_type":"server",
+                            "region":"server",
+                            "must_exists":True }
+
+        stack.remove_resource(ref_only=None,**_destroy_values)
 
     return stack.get_results()

@@ -108,9 +108,6 @@ def run(stackargs):
     stack.parse.add_optional(key="terraform_docker_exec_env",default="elasticdev/terraform-run-env")
     stack.parse.add_optional(key="ansible_docker_exec_env",default="elasticdev/ansible-run-env")
 
-    # Testingyoyo
-    # ubuntu 18.04 - install docker with regular hostgroup and shell scripting
-
     # Add execgroup
     stack.add_execgroup("elasticdev:::aws::attach_volume_to_ec2")
 
@@ -230,8 +227,6 @@ def run(stackargs):
     inputargs["groups"] = stack.config_vol
 
     stack.add_groups_to_host(**inputargs)
-
-    # Testingyoyo
 
     ###############################################################
     # standard env variables for creating the mongodb cluster
