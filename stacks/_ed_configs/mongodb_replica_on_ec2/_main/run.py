@@ -134,13 +134,14 @@ def run(stackargs):
     stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
 
     # destroy bastion config after replica completes
-    if stack.bastion_config_destroy:
+    # Testingyoyo
+    #if stack.bastion_config_destroy:
 
-        _destroy_values = { "hostname":stack.bastion_hostname,
-                            "resource_type":"server",
-                            "region":"server",
-                            "must_exists":True }
+    #    _destroy_values = { "hostname":stack.bastion_hostname,
+    #                        "resource_type":"server",
+    #                        "region":"server",
+    #                        "must_exists":True }
 
-        stack.remove_resource(ref_only=None,**_destroy_values)
+    #    stack.remove_resource(ref_only=None,**_destroy_values)
 
     return stack.get_results()
