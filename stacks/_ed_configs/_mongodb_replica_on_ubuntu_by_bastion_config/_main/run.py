@@ -28,7 +28,7 @@ def _get_ssh_key(stack):
     _lookup["serialize"] = True
     _lookup["serialize_keys"] = [ "private_key" ]
 
-    return stack.get_resource(decrypt=True,**_lookup)
+    return stack.get_resource(decrypt=True,**_lookup)["private_key"]
 
 def _get_mongodb_pem(stack):
 
@@ -39,7 +39,7 @@ def _get_mongodb_pem(stack):
     _lookup["serialize"] = True
     _lookup["serialize_keys"] = [ "contents" ]
 
-    return stack.get_resource(decrypt=True,**_lookup)
+    return stack.get_resource(decrypt=True,**_lookup)["contents"]
 
     # lookup mongodb keyfile needed for secure mongodb replication
 def _get_mongodb_keyfile(stack):
@@ -50,7 +50,7 @@ def _get_mongodb_keyfile(stack):
     _lookup["serialize"] = True
     _lookup["serialize_keys"] = [ "contents" ]
 
-    return stack.get_resource(decrypt=True,**_lookup)
+    return stack.get_resource(decrypt=True,**_lookup)["contents"]
 
 def _get_mongodb_hosts(stack):
 
