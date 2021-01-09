@@ -40,21 +40,27 @@ def run(stackargs):
     _lookup = {"must_exists":True}
     _lookup["resource_type"] = "ssh_key_pair"
     _lookup["name"] = stack.ssh_keyname
-    private_key = list(stack.get_resource(decrypt=True,**_lookup))[0]["private_key"]
+    _lookup["serialize"] = True
+    _lookup["serialize_keys"] = [ "contents" ]
+    return stack.get_resource(decrypt=True,**_lookup)
 
     # get mongodb pem key
     _lookup = {"must_exists":True}
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
-    mongodb_pem = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    _lookup["serialize"] = True
+    _lookup["serialize_keys"] = [ "contents" ]
+    return stack.get_resource(decrypt=True,**_lookup)
 
     # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":True}
     _lookup["provider"] = "openssl"
     _lookup["resource_type"] = "symmetric_key"
     _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
-    mongodb_keyfile = list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    _lookup["serialize"] = True
+    _lookup["serialize_keys"] = [ "contents" ]
+    return stack.get_resource(decrypt=True,**_lookup)
 
     #stack.set_parallel(wait_all=True)
 

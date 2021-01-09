@@ -88,6 +88,7 @@ class Main(ResourceCmdHelper):
         self.write_key_to_file(key="mongodb_keyfile",
                                filepath=filepath,
                                split_char="return",
+                               deserialize=True,
                                add_return=True,
                                permission=400)
 
@@ -100,6 +101,7 @@ class Main(ResourceCmdHelper):
         self.write_key_to_file(key="mongodb_pem",
                                filepath=filepath,
                                split_char="return",
+                               deserialize=True,
                                add_return=True,
                                permission=400)
         

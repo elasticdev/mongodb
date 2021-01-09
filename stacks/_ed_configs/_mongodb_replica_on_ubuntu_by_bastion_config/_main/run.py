@@ -25,8 +25,10 @@ def _get_ssh_key(stack):
     _lookup = {"must_exists":True}
     _lookup["resource_type"] = "ssh_key_pair"
     _lookup["name"] = stack.ssh_keyname
+    _lookup["serialize"] = True
+    _lookup["serialize_keys"] = [ "contents" ]
 
-    return list(stack.get_resource(decrypt=True,**_lookup))[0]["private_key"]
+    return stack.get_resource(decrypt=True,**_lookup)
 
 def _get_mongodb_pem(stack):
 
@@ -34,8 +36,10 @@ def _get_mongodb_pem(stack):
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
     _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
+    _lookup["serialize"] = True
+    _lookup["serialize_keys"] = [ "contents" ]
 
-    return list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    return stack.get_resource(decrypt=True,**_lookup)
 
     # lookup mongodb keyfile needed for secure mongodb replication
 def _get_mongodb_keyfile(stack):
@@ -43,8 +47,10 @@ def _get_mongodb_keyfile(stack):
     _lookup["provider"] = "openssl"
     _lookup["resource_type"] = "symmetric_key"
     _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
+    _lookup["serialize"] = True
+    _lookup["serialize_keys"] = [ "contents" ]
 
-    return list(stack.get_resource(decrypt=True,**_lookup))[0]["contents"]
+    return stack.get_resource(decrypt=True,**_lookup)
 
 def _get_mongodb_hosts(stack):
 
