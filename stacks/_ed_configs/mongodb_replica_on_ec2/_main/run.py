@@ -45,7 +45,7 @@ def run(stackargs):
 
     # Add substack
     stack.add_substack('elasticdev:::ec2_ubuntu')
-    stack.add_substack('elasticdev:::mongodb_replica_on_ubuntu')
+    stack.add_substack('elasticdev:::_mongodb_replica_on_ubuntu_by_bastion_config')
 
     # Initialize 
     stack.init_variables()
@@ -131,7 +131,7 @@ def run(stackargs):
     human_description = "Initialing Ubuntu specific actions mongodb_username and mongodb_password"
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
-    stack.mongodb_replica_on_ubuntu.insert(display=True,**inputargs)
+    stack._mongodb_replica_on_ubuntu_by_bastion_config.insert(display=True,**inputargs)
 
     # destroy bastion config after replica completes
     # Testingyoyo
