@@ -1,0 +1,110 @@
+---
+
+- block:
+    - name: Add Mongodb Repo
+      yum_repository:
+        name: mongodb-org
+        description: MongoDB Repository
+        baseurl: https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.2/x86_64/
+        gpgcheck: yes
+        enabled: yes
+        gpgkey: https://www.mongodb.org/static/pgp/server-4.2.asc
+
+    - name: Install Mongodb
+      yum:
+        name: mongodb*
+        enablerepo: mongodb-org
+        state: present
+
+      #- name: install mongodb packages
+      #- yum:
+      #-   name: "{{ item }}"
+      #-   enablerepo: mongodb-org
+      #-   state: present
+      #- with_items: "{{ mongodb_packages }}"
+
+    - name: Install python3-pip
+      yum:
+        name: "python3-pip"
+    
+    - name: Install the latest pymongo package
+      raw: pip3 install pymongo
+      #pip: 
+      #  executable: pip3
+      #  name: pymongo
+      #  state: latest 
+      #  use_mirrors: no
+      #
+    - name: add mongodb directories
+      file:
+        state: directory
+        path: "{{ item }}"
+        owner: "{{ mongodb_user }}"
+        group: "{{ mongodb_group }}"
+        mode: 0755
+      with_items:
+        - "{{ mongodb_dbpath }}"
+        - "{{ mongodb_security_path }}"
+        - "{{ mongodb_logpath | dirname }}"
+
+    - name: copy mongodb pem file for ssl
+      copy:
+        dest: "{{ mongodb_pem_path }}"
+        owner: "{{ mongodb_user }}"
+        group: "{{ mongodb_group }}"
+        mode: 0600
+        src: "{{ mongodb_pem }}"
+      notify: restart mongodb
+      when: "{{ mongodb_pem is defined }}"
+
+    - name: copy mongodb replication keyfile
+      copy:
+        dest: "{{ mongodb_keyfile_path }}"
+        owner: "{{ mongodb_user }}"
+        group: "{{ mongodb_group }}"
+        mode: 0600
+        src: "{{ mongodb_keyfile }}"
+      notify: restart mongodb
+      when: "{{ mongodb_keyfile is defined }}"
+
+      #- name: copy mongodb servicefile path
+      #- copy:
+      #-   dest: "{{ mongodb_servicefile_path }}"
+      #-   owner: "root"
+      #-   group: "root"
+      #-   mode: 0755
+      #-   src: "{{ mongodb_servicefile }}"
+      #- notify: restart mongodb
+      #- when: "{{ mongodb_servicefile is defined }}"
+
+    - name: copy mongodb replication keyfile content
+      copy:
+        dest: "{{ mongodb_keyfile_path }}"
+        owner: "{{ mongodb_user }}"
+        group: "{{ mongodb_group }}"
+        mode: 0600
+        content: "{{ mongodb_keyfile_content }}"
+      notify: restart mongodb
+      when: "{{ mongodb_keyfile_content is defined }}"
+
+    - name: create mongodb configuration
+      template:
+        src: mongod.conf.j2
+        dest: /etc/mongod.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart mongodb
+
+    - name: ensure mongodb service is running and enabled on boot
+      service:
+        name: "{{ mongodb_service_name }}"
+        enabled: yes
+        state: started
+
+    - meta: flush_handlers
+
+  become: true
+  become_method: sudo
+  tags:
+    - mongodb-4.0

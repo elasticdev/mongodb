@@ -111,8 +111,8 @@ def run(stackargs):
 
     stack.unset_parallel(wait_all=True)
 
-    # provide the mongodb_hosts and begin installing the mongo specific 
-    # package and replication
+    # provide the mongodb_hosts and begin installing 
+    # the mongo specific package and replication
     default_values = {"mongodb_cluster":stack.mongodb_cluster}
     default_values["ssh_keyname"] = stack.ssh_keyname
     default_values["mongodb_hosts"] = mongodb_hosts

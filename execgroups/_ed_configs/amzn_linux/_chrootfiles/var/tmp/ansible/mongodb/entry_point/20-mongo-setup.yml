@@ -1,0 +1,10 @@
+---
+- name: install
+  hosts: configuration
+  roles:
+    - role: ../roles/mongodb
+      mongodb_repl_set_name: rs0
+      mongodb_keyfile: ../roles/init_replica_nodes/files/mongodb_keyfile
+      mongodb_pem: ../roles/init_replica_nodes/files/mongodb.pem
+      # mongodb_repl_oplog_size: 51200
+      #

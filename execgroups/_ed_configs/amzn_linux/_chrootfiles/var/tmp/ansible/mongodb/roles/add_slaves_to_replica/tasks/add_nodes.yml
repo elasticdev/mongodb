@@ -1,0 +1,11 @@
+---
+- name: play that sets a group to loop over
+  vars:
+    private_replicas: "{{ groups['private-secondaries'] }}"
+  template:
+    src: replicaset_add_node.j2
+    dest: /tmp/replicaset_add_node.js
+
+- name: Execute the initialization script and add all replicants
+  shell: mongo --ssl --sslAllowInvalidCertificates --host "localhost:{{ mongodb_port }}" -u "{{ mongodb_admin_user }}" -p "{{ mongodb_admin_pass }}" --authenticationDatabase "admin" < /tmp/replicaset_add_node.js
+#shell: mongo --host "localhost:{{ mongodb_port }}" -u "{{ mongodb_admin_user }}" -p "{{ mongodb_admin_pass }}" --authenticationDatabase "admin" < /tmp/replicaset_add_node.js

@@ -1,0 +1,10 @@
+---
+- name: Start Replicaset
+  hosts: 
+    - config_network
+  remote_user: "{{ os_user }}"
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  roles:
+    - ../roles/init_replica_nodes

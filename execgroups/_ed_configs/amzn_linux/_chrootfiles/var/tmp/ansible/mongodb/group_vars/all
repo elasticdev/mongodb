@@ -1,0 +1,20 @@
+---
+os_user: ec2-user
+mongodb_admin_user: main
+mongodb_admin_pass: admin123
+mongodb_port: 27017
+mongodb_bind_ip: 0.0.0.0
+mongodb_dbpath: /var/lib/mongo
+mongodb_logpath: /var/log/mongo/mongod.log
+mongodb_security_path: /etc/mongodb/security
+mongodb_keyfile_path: /etc/mongodb/security/mongodb_keyfile
+mongodb_pem_path: /etc/mongodb/security/mongo.pem
+mongodb_servicefile_path: /etc/systemd/system/mongodb.service
+mongodb_servicefile: files/mongodb.service
+mongodb_storage_engine: "wiredTiger"
+mongodb_journal_enabled: true
+mongodb_profiling_threshold: 100
+mongodb_profiling_mode: "off"
+mongodb_enable_localhost_auth_bypass: true
+mongodb_is_arbiter: false
+mongodb_authorization_enabled: true

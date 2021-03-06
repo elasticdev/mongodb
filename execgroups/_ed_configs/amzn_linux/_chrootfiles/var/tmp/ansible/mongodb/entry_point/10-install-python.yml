@@ -1,0 +1,8 @@
+---
+- hosts: configuration
+  remote_user: "{{ os_user }}"
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install Python
+      raw: yum install -y python3

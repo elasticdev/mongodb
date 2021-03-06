@@ -1,0 +1,4 @@
+---
+- include: add_nodes.yml
+  when: groups['private-secondaries'] is defined
+#ignore_errors: True
