@@ -45,6 +45,12 @@ def run(stackargs):
 
     # Add substack
     stack.add_substack('elasticdev:::ec2_ubuntu')
+
+    # Testingyoyo
+    stack.add_substack('elasticdev:::create_mongodb_pem')
+    stack.add_substack('elasticdev:::create_mongodb_keyfile')
+    # Testingyoyo
+
     stack.add_substack('elasticdev:::_mongodb_replica_on_ubuntu_by_bastion_config')
 
     # Initialize 
@@ -52,6 +58,28 @@ def run(stackargs):
     stack.init_substacks()
 
     stack.set_parallel()
+
+    # Testingyoyo
+    # lookup mongodb pem file needed for ssl/tls connection
+    _lookup = {"must_exists":None}
+    _lookup["resource_type"] = "ssl_pem"
+    _lookup["provider"] = "openssl"
+    _lookup["name"] = "{}.pem".format(stack.mongodb_cluster)
+    if not stack.get_resource(**_lookup):
+        default_values = {"basename":stack.mongodb_cluster}
+        inputargs = {"default_values":default_values}
+        stack.create_mongodb_pem.insert(display=True,**inputargs)
+
+    # lookup mongodb keyfile needed for secure mongodb replication
+    _lookup = {"must_exists":None}
+    _lookup["provider"] = "openssl"
+    _lookup["resource_type"] = "symmetric_key"
+    _lookup["name"] = "{}_keyfile".format(stack.mongodb_cluster)
+    if not stack.get_resource(**_lookup):
+        default_values = {"basename":stack.mongodb_cluster}
+        inputargs = {"default_values":default_values}
+        stack.create_mongodb_keyfile.insert(display=True,**inputargs)
+    # Testingyoyo
 
     mongodb_hosts = []
 
