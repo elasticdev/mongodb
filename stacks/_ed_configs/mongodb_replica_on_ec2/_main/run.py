@@ -8,6 +8,10 @@ def run(stackargs):
     stack.parse.add_required(key="num_of_replicas",default="1")
     stack.parse.add_required(key="ssh_keyname")
 
+    stack.parse.add_required(key="image",default="ami-06fb5332e8e3e577a")
+
+    stack.parse.add_optional(key="aws_default_region",default="us-east-1")
+
     # This will be public_main/private_main
     stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
 
@@ -25,13 +29,10 @@ def run(stackargs):
     # destroy bastion config
     stack.parse.add_optional(key="bastion_config_destroy",default="null")
 
-    stack.parse.add_required(key="image",default="ami-06fb5332e8e3e577a")
-    stack.parse.add_required(key="aws_default_region",default="us-east-1")
-
     stack.parse.add_optional(key="security_groups",default="null")
     stack.parse.add_optional(key="vpc_name",default="null")
     stack.parse.add_optional(key="subnet",default="null")
-    stack.parse.add_optional(key="size",default="t3.micro")
+    stack.parse.add_optional(key="instance_type",default="t3.micro")
     stack.parse.add_optional(key="disksize",default="20")
     stack.parse.add_optional(key="ip_key",default="private_ip")
 
@@ -90,7 +91,7 @@ def run(stackargs):
     default_values = {"vpc_name":stack.vpc_name}
     default_values["keyname"] = stack.ssh_keyname
     default_values["aws_default_region"] = stack.aws_default_region
-    default_values["size"] = stack.size
+    default_values["size"] = stack.instance_type
     default_values["disksize"] = stack.disksize
 
     overide_values = {"hostname":stack.bastion_hostname}
@@ -120,7 +121,7 @@ def run(stackargs):
         default_values["security_groups"] = stack.security_groups
         default_values["vpc_name"] = stack.vpc_name
         default_values["subnet"] = stack.subnet
-        default_values["size"] = stack.size
+        default_values["size"] = stack.instance_type
         default_values["disksize"] = stack.disksize
         default_values["register_to_ed"] = None
         default_values["volume_size"] = stack.volume_size
