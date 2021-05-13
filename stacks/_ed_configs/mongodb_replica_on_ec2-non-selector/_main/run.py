@@ -11,6 +11,10 @@ def run(stackargs):
     stack.parse.add_required(key="image",default="ami-06fb5332e8e3e577a")
 
     stack.parse.add_optional(key="aws_default_region",default="us-east-1")
+
+    # This will be public_main/private_main
+    stack.parse.add_optional(key="config_network",choices=["public","private"],default="public")
+
     stack.parse.add_optional(key="mongodb_username",default="null")
     stack.parse.add_optional(key="mongodb_password",default="null")
     stack.parse.add_optional(key="vm_username",default="null")
@@ -18,24 +22,20 @@ def run(stackargs):
     # We will enable random suffix to add to the hostname
     stack.parse.add_optional(key="hostname_random",default="null")
 
-    # hellohello
-    stack.parse.add_optional(key="bastion_sg_id",default="null")
-    stack.parse.add_optional(key="bastion_subnet_ids",default="null")
+    stack.parse.add_optional(key="bastion_security_groups",default="bastion")
+    stack.parse.add_optional(key="bastion_subnet",default="private")
     stack.parse.add_optional(key="bastion_image",default="ami-06fb5332e8e3e577a")
+
     # destroy bastion config
     stack.parse.add_optional(key="bastion_config_destroy",default="null")
 
-    # This will be public_main/private_main
-    stack.parse.add_optional(key="config_network",choices=["public","private"],default="private")  # the network to push configuration to mongodb hosts
-
-    # hellohello
-    stack.parse.add_optional(key="sg_id",default="null")
-    stack.parse.add_optional(key="vpc_id",default="null")
-    stack.parse.add_optional(key="subnet_ids",default="null")
-
+    stack.parse.add_optional(key="security_groups",default="null")
+    stack.parse.add_optional(key="vpc_name",default="null")
+    stack.parse.add_optional(key="subnet",default="null")
     stack.parse.add_optional(key="instance_type",default="t3.micro")
     stack.parse.add_optional(key="disksize",default="20")
     stack.parse.add_optional(key="ip_key",default="private_ip")
+
     stack.parse.add_optional(key="tags",default="null")
     stack.parse.add_optional(key="labels",default="null")
 
@@ -46,8 +46,10 @@ def run(stackargs):
 
     # Add substack
     stack.add_substack('elasticdev:::ec2_ubuntu')
+
     stack.add_substack('elasticdev:::create_mongodb_pem')
     stack.add_substack('elasticdev:::create_mongodb_keyfile')
+
     stack.add_substack('elasticdev:::_mongodb_replica_on_ubuntu_by_bastion_config')
 
     # Initialize 
@@ -56,7 +58,7 @@ def run(stackargs):
 
     stack.set_parallel()
 
-    # create if needed mongodb pem file needed for ssl/tls connection
+    # lookup mongodb pem file needed for ssl/tls connection
     _lookup = {"must_exists":None}
     _lookup["resource_type"] = "ssl_pem"
     _lookup["provider"] = "openssl"
@@ -66,7 +68,7 @@ def run(stackargs):
         inputargs = {"default_values":default_values}
         stack.create_mongodb_pem.insert(display=True,**inputargs)
 
-    # create if needed mongodb keyfile needed for secure mongodb replication
+    # lookup mongodb keyfile needed for secure mongodb replication
     _lookup = {"must_exists":None}
     _lookup["provider"] = "openssl"
     _lookup["resource_type"] = "symmetric_key"
@@ -86,7 +88,7 @@ def run(stackargs):
     # Set up bastion configuration host
     stack.set_variable("bastion_hostname","{}-config".format(hostname_base))
 
-    default_values = {"vpc_id":stack.vpc_id}
+    default_values = {"vpc_name":stack.vpc_name}
     default_values["keyname"] = stack.ssh_keyname
     default_values["aws_default_region"] = stack.aws_default_region
     default_values["size"] = stack.instance_type
@@ -94,8 +96,8 @@ def run(stackargs):
 
     overide_values = {"hostname":stack.bastion_hostname}
     overide_values["register_to_ed"] = True
-    overide_values["subnet_ids"] = stack.bastion_subnet_ids
-    overide_values["sg_id"] = stack.bastion_sg_id
+    overide_values["subnet"] = stack.bastion_subnet
+    overide_values["security_groups"] = stack.bastion_security_groups
     overide_values["image"] = stack.bastion_image
 
     inputargs = {"default_values":default_values,
@@ -116,9 +118,9 @@ def run(stackargs):
         default_values["keyname"] = stack.ssh_keyname
         default_values["image"] = stack.image
         default_values["aws_default_region"] = stack.aws_default_region
-        default_values["sg_id"] = stack.sg_id
-        default_values["vpc_id"] = stack.vpc_id
-        default_values["subnet_ids"] = stack.subnet_ids
+        default_values["security_groups"] = stack.security_groups
+        default_values["vpc_name"] = stack.vpc_name
+        default_values["subnet"] = stack.subnet
         default_values["size"] = stack.instance_type
         default_values["disksize"] = stack.disksize
         default_values["register_to_ed"] = None
