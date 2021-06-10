@@ -28,7 +28,6 @@ def run(stackargs):
     # This will be public_main/private_main
     stack.parse.add_optional(key="config_network",choices=["public","private"],default="private")  # the network to push configuration to mongodb hosts
 
-    # hellohello
     stack.parse.add_optional(key="sg_id",default="null")
     stack.parse.add_optional(key="vpc_id",default="null")
     stack.parse.add_optional(key="subnet_ids",default="null")
