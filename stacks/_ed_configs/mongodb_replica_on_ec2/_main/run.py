@@ -26,7 +26,7 @@ def run(stackargs):
     stack.parse.add_optional(key="bastion_config_destroy",default="null")
 
     # This will be public_main/private_main
-    stack.parse.add_optional(key="config_network",choices=["public","private"],default="private")  # the network to push configuration to mongodb hosts
+    stack.parse.add_optional(key="config_network",choices=["private","public"],default="private")  # the network to push configuration to mongodb hosts
 
     stack.parse.add_optional(key="sg_id",default="null")
     stack.parse.add_optional(key="vpc_id",default="null")
@@ -34,7 +34,6 @@ def run(stackargs):
 
     stack.parse.add_optional(key="instance_type",default="t3.micro")
     stack.parse.add_optional(key="disksize",default="20")
-    stack.parse.add_optional(key="ip_key",default="private_ip")
     stack.parse.add_optional(key="tags",default="null")
     stack.parse.add_optional(key="labels",default="null")
 
@@ -75,14 +74,12 @@ def run(stackargs):
         inputargs = {"default_values":default_values}
         stack.create_mongodb_keyfile.insert(display=True,**inputargs)
 
-    mongodb_hosts = []
-
+    # Set up bastion configuration host
     if stack.hostname_random:
         hostname_base = "{}-replica-{}".format(stack.mongodb_cluster,stack.random_id(size=3).lower())
     else:
         hostname_base = "{}-replica".format(stack.mongodb_cluster)
 
-    # Set up bastion configuration host
     stack.set_variable("bastion_hostname","{}-config".format(hostname_base))
 
     default_values = {"vpc_id":stack.vpc_id}
@@ -104,6 +101,8 @@ def run(stackargs):
     inputargs["automation_phase"] = "infrastructure"
     inputargs["human_description"] = human_description
     stack.ec2_ubuntu.insert(display=True,**inputargs)
+
+    mongodb_hosts = []
 
     # Create mongodb ec2 instances
     for num in range(int(stack.num_of_replicas)):
