@@ -1,0 +1,36 @@
+- hosts: all
+  remote_user: "{{ os_user }}"
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install Python
+      raw: apt -y update && apt install -y python
+          
+- name: install
+  hosts: configuration
+  roles:
+    - role: ../roles/mongodb
+      mongodb_repl_set_name: rs0
+      mongodb_keyfile: ../roles/init_replica_nodes/files/mongodb_keyfile
+      mongodb_pem: ../roles/init_replica_nodes/files/mongodb.pem
+      # mongodb_repl_oplog_size: 51200
+
+- name: Start Replicaset
+  hosts: 
+    - config_network
+  remote_user: "{{ os_user }}"
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  roles:
+    - ../roles/init_replica_nodes
+
+- name: Start Replicaset
+  hosts: 
+    - config_network
+  remote_user: "{{ os_user }}"
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  roles:
+      - ../roles/add_slaves_to_replica
