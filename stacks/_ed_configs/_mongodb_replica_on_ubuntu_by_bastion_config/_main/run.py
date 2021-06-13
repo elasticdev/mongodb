@@ -274,10 +274,7 @@ def run(stackargs):
 
     #inputargs["name"] = stack.mongodb_cluster
 
-    ###############################################################
     # deploy files Ansible for MongoDb
-    ###############################################################
-
     human_description = "Setting up Ansible for MongoDb"
 
     inputargs = {"display":True}
@@ -290,11 +287,77 @@ def run(stackargs):
 
     stack.add_groups_to_host(**inputargs)
 
+    ###############################################################
     # mongo install
-    human_description = "Install MongoDb version {}".format(stack.mongodb_version)
+    ###############################################################
+
+    ##------------------------------------------------------------------
+    ## mongo install single step
+    ##------------------------------------------------------------------
+    #human_description = "Install MongoDb version {}".format(stack.mongodb_version)
+
+    #env_vars = base_env_vars.copy()
+    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/all.yml"
+    #docker_env_fields_keys = env_vars.keys()
+    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    #inputargs = {"display":True}
+    #inputargs["human_description"] = human_description
+    #inputargs["env_vars"] = json.dumps(env_vars)
+    #inputargs["stateful_id"] = stateful_id
+    #inputargs["automation_phase"] = "infrastructure"
+    #inputargs["hostname"] = stack.bastion_hostname
+    #inputargs["groups"] = stack.ubuntu_vendor_init_replica
+
+    #stack.add_groups_to_host(**inputargs)
+
+    ###############################################################
+    # Separate steps, but slow
+    ###############################################################
+
+    # mongo install and setup
+    human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
 
     env_vars = base_env_vars.copy()
-    env_vars["ANS_VAR_exec_ymls"] = "entry_point/all.yml"
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
+    docker_env_fields_keys = env_vars.keys()
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    inputargs = {"display":True}
+    inputargs["human_description"] = human_description
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = stateful_id
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.ubuntu_vendor_init_replica
+
+    stack.add_groups_to_host(**inputargs)
+
+    # mongo init replica
+    human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
+
+    env_vars = base_env_vars.copy()
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
+    docker_env_fields_keys = env_vars.keys()
+    env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
+
+    inputargs = {"display":True}
+    inputargs["human_description"] = human_description
+    inputargs["env_vars"] = json.dumps(env_vars)
+    inputargs["stateful_id"] = stateful_id
+    inputargs["automation_phase"] = "infrastructure"
+    inputargs["hostname"] = stack.bastion_hostname
+    inputargs["groups"] = stack.ubuntu_vendor_init_replica
+
+    stack.add_groups_to_host(**inputargs)
+
+    # add slave replica nodes
+    human_description = "Add slave nodes to the master node"
+
+    #inputargs["name"] = stack.mongodb_cluster
+
+    env_vars = base_env_vars.copy()
+    env_vars["ANS_VAR_exec_ymls"] = "entry_point/40-mongo-add-slave-replica.yml"
     docker_env_fields_keys = env_vars.keys()
     env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
 
@@ -328,68 +391,3 @@ def run(stackargs):
     stack.publish(_publish_vars)
 
     return stack.get_results()
-
-    ################################################################
-    ## Separate steps, but slow
-    ################################################################
-
-    ## mongo install and setup
-    #human_description = "Install MongoDb version {} on nodes".format(stack.mongodb_version)
-
-    #env_vars = base_env_vars.copy()
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/20-mongo-setup.yml"
-    #docker_env_fields_keys = env_vars.keys()
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-
-    #inputargs = {"display":True}
-    #inputargs["human_description"] = human_description
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["stateful_id"] = stateful_id
-    #inputargs["automation_phase"] = "infrastructure"
-    #inputargs["hostname"] = stack.bastion_hostname
-    #inputargs["groups"] = stack.ubuntu_vendor_init_replica
-
-    #stack.add_groups_to_host(**inputargs)
-
-    ################################################################
-    ## mongo init replica
-    ################################################################
-    #human_description = "Initialize ReplicaSet on Master Node {}/{}".format(public_ips[0],private_ips[0])
-
-    #env_vars = base_env_vars.copy()
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/30-mongo-init-replica.yml"
-    #docker_env_fields_keys = env_vars.keys()
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-
-    #inputargs = {"display":True}
-    #inputargs["human_description"] = human_description
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["stateful_id"] = stateful_id
-    #inputargs["automation_phase"] = "infrastructure"
-    #inputargs["hostname"] = stack.bastion_hostname
-    #inputargs["groups"] = stack.ubuntu_vendor_init_replica
-
-    #stack.add_groups_to_host(**inputargs)
-
-    ################################################################
-    ## add slave replica nodes
-    ################################################################
-    #human_description = "Add slave nodes to the master node"
-
-    ##inputargs["name"] = stack.mongodb_cluster
-
-    #env_vars = base_env_vars.copy()
-    #env_vars["ANS_VAR_exec_ymls"] = "entry_point/40-mongo-add-slave-replica.yml"
-    #docker_env_fields_keys = env_vars.keys()
-    #env_vars["DOCKER_ENV_FIELDS"] = ",".join(docker_env_fields_keys)
-
-    #inputargs = {"display":True}
-    #inputargs["human_description"] = human_description
-    #inputargs["env_vars"] = json.dumps(env_vars)
-    #inputargs["stateful_id"] = stateful_id
-    #inputargs["automation_phase"] = "infrastructure"
-    #inputargs["hostname"] = stack.bastion_hostname
-    #inputargs["groups"] = stack.ubuntu_vendor_init_replica
-
-    #stack.add_groups_to_host(**inputargs)
-
