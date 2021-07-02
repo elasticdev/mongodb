@@ -67,13 +67,6 @@ infrastructure:
 ```
 global_arguments:
    aws_default_region: us-west-1
-labels:
-   general: 
-     environment: dev
-     purpose: test
-   infrastructure:
-     cloud: aws
-     product: mongodb
 selectors:
    vpc_info:
      match_labels:
@@ -123,18 +116,8 @@ selectors:
        must_be_one: True
        resource_type: security_group
 infrastructure:
-   ssh_upload:
-       stack_name: elasticdev:::ec2_ssh_upload
-       arguments:
-          name: mongodb-cluster-ssh-dev
-          clobber: True
-       credentials:
-           - reference: aws_2
-             orchestration: true
    replica:
        stack_name: elasticdev:::mongodb_replica_on_ec2
-       dependencies:
-          - infrastructure::ssh_upload
        arguments:
           vpc_name: selector:::vpc_info::name
           subnet_ids: selector:::private_subnet_info::subnet_id:csv
@@ -155,7 +138,4 @@ infrastructure:
          - private_subnet_info
          - sg_bastion_info
          - sg_database_info
-       credentials:
-           - reference: aws_2
-             orchestration: true
 ```
