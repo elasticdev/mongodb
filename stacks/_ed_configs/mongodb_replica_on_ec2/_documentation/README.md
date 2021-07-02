@@ -78,48 +78,36 @@ selectors:
    vpc_info:
      match_labels:
        car: bmw
-       model: 320i
        environment: dev
-       app_tier: networking
      match_keys:
        provider: aws
-       region: us-west-1
      match_params:
        must_exists: True
        resource_type: vpc
    private_subnet_info:
      match_labels:
        car: bmw
-       model: 320i
        environment: dev
-       app_tier: networking
      match_keys:
        provider: aws
-       region: us-west-1
        name: private
      match_params:
        resource_type: subnet
    public_subnet_info:
      match_labels:
        car: bmw
-       model: 320i
        environment: dev
-       app_tier: networking
      match_keys:
        provider: aws
-       region: us-west-1
        name: public
      match_params:
        resource_type: subnet
    sg_database_info:
      match_labels:
        car: bmw
-       model: 320i
        environment: dev
-       app_tier: networking
      match_keys:
        provider: aws
-       region: us-west-1
        name: database
      match_params:
        must_be_one: True
@@ -127,12 +115,9 @@ selectors:
    sg_bastion_info:
      match_labels:
        car: bmw
-       model: 320i
        environment: dev
-       app_tier: networking
      match_keys:
        provider: aws
-       region: us-west-1
        name: bastion
      match_params:
        must_be_one: True
@@ -157,19 +142,13 @@ infrastructure:
           vpc_id: selector:::vpc_info::vpc_id
           bastion_sg_id: selector:::sg_bastion_info::sg_id
           bastion_subnet_ids: selector:::public_subnet_info::subnet_id:csv
-          bastion_config_destroy: true
           mongodb_cluster: mongodb-cluster-dev
-          hostname_random: true
           size: t3.micro
           ssh_keyname: mongodb-cluster-ssh-dev
           num_of_replicas: 3
-          disksize: 25
-          ip_key: public_ip
           volume_size: 25
           volume_mount: /var/lib/mongodb
           volume_fstype: xfs
-          mongodb_username: admin123
-          mongodb_password: admin123
        selectors:
          - vpc_info
          - public_subnet_info
