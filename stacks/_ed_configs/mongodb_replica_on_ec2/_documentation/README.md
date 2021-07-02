@@ -13,34 +13,32 @@
 | ssh_keyname   | the name the ssh_keyname to use for the VMs       | string   | None         |
 | mongodb_cluster   | the name of the mongodb cluster       | string   | None         |
 | num_of_replicas   | the number of replicas in the mongodb cluster       | string   | 1         |
-| image   | the ami image used for the mongodb instances      | string   | ami-06fb5332e8e3e577a         |
-
-# hellohello
 | bastion_sg_id   | the security group id used for the bastion config host      | string   | bastion         |
 | bastion_subnet_ids   | the subnet id(s) in CSV used for the bastion config host      | string   | private         |
-| bastion_image   | the ami image used for the bastion config host      | string   | ami-06fb5332e8e3e577a         |
+| subnet_ids   | the subnet id(s) in CSV used for the mongodb servers     | string   | private         |
+| vpc_id | the vpc id | string   | None       |
+| sg_id | security group id for the VMs | string   | None       |
 
 **Optional**
 
 | argument           | description                            | var type |  default      |
 | ------------- | -------------------------------------- | -------- | ------------ |
+| image   | the ami image used for the mongodb instances      | string   | ami-06fb5332e8e3e577a         |
+| bastion_image   | the ami image used for the bastion config host      | string   | ami-06fb5332e8e3e577a         |
 | aws_default_region   | aws region to create the ecr repo                | string   | us-east-1         |
 | vm_username | The username for the VM.  e.g. ec2 for AWS linux     | string   | master       |
-
-# hellohello
-| sg_id | security group id for the VMs | string   | None       |
-| vpc_id | the vpc id | string   | None       |
-| subnet_ids   | the subnet id(s) in CSV used for the mongodb servers     | string   | private         |
-
+| hostname_random | Generate random hostname bases for the instances    | string   | master       |
+| vpc_name | the vpc name | string   | None       |
+| bastion_config_destroy   | after configuration of the mongodb cluster through bastion host, destroy it  | string   | true         |
 | instance_type | the VMs instance_type for the VMs | string   | None       |
 | disksize | the disksize for the VM | string   | None       |
-| tags | the tags for the Kafka cluster as ED resources | string   | None       |
-| labels | the labels for the Kafka cluster as ED resources | string   | None       |
 | mongodb_username | the master mongodb username    | string   | master       |
 | mongodb_password | the master mongodb password    | string   | master       |
 | volume_size | the size for volume used for mongodb data | string   | 100       |
 | volume_mountpoint | the mountpoint for volume used for mongodb data | string   | /var/lib/mongodb       |
 | volume_fstype | the fileystem type for volume used for mongodb data | string   | xfs       |
+| tags | the tags for the Kafka cluster as ED resources | string   | None       |
+| labels | the labels for the Kafka cluster as ED resources | string   | None       |
 
 **Sample entry**
 
@@ -49,17 +47,14 @@ infrastructure:
    replica:
        stack_name: elasticdev:::mongodb_replica_on_ec2
        arguments:
-          bastion_config_destroy: true
+          ssh_keyname: mongodb-cluster-ssh-dev
           bastion_security_groups: bastion
           bastion_subnet: public
-          hostname_random: true
-          size: t3.micro
-          ssh_keyname: mongodb-cluster-ssh-dev
+          instance_type: t3.micro
           num_of_replicas: 3
           security_groups: database
           subnet: private
           disksize: 25
-          ip_key: public_ip
           volume_size: 25
           volume_mount: /var/lib/mongodb
           volume_fstype: xfs
@@ -67,57 +62,122 @@ infrastructure:
           mongodb_password: admin123
 ```
 
-**Sample launch elasticdev/elasticdev.yml**
+**Sample launch elasticdev/elasticdev.yml (with labels and selectors)**
 
 ```
 global_arguments:
-   aws_default_region: ap-southeast-1
-   vpc_name: kafka-cluster-dev-vpc
-   kafka_cluster: kafka-cluster-dev
+   aws_default_region: us-west-1
+labels:
+   general: 
+     environment: dev
+     purpose: test
+   infrastructure:
+     cloud: aws
+     product: mongodb
+selectors:
+   vpc_info:
+     match_labels:
+       car: bmw
+       model: 320i
+       environment: dev
+       app_tier: networking
+     match_keys:
+       provider: aws
+       region: us-west-1
+     match_params:
+       must_exists: True
+       resource_type: vpc
+   private_subnet_info:
+     match_labels:
+       car: bmw
+       model: 320i
+       environment: dev
+       app_tier: networking
+     match_keys:
+       provider: aws
+       region: us-west-1
+       name: private
+     match_params:
+       resource_type: subnet
+   public_subnet_info:
+     match_labels:
+       car: bmw
+       model: 320i
+       environment: dev
+       app_tier: networking
+     match_keys:
+       provider: aws
+       region: us-west-1
+       name: public
+     match_params:
+       resource_type: subnet
+   sg_database_info:
+     match_labels:
+       car: bmw
+       model: 320i
+       environment: dev
+       app_tier: networking
+     match_keys:
+       provider: aws
+       region: us-west-1
+       name: database
+     match_params:
+       must_be_one: True
+       resource_type: security_group
+   sg_bastion_info:
+     match_labels:
+       car: bmw
+       model: 320i
+       environment: dev
+       app_tier: networking
+     match_keys:
+       provider: aws
+       region: us-west-1
+       name: bastion
+     match_params:
+       must_be_one: True
+       resource_type: security_group
 infrastructure:
    ssh_upload:
        stack_name: elasticdev:::ec2_ssh_upload
        arguments:
-          name: kafka-cluster-ssh-dev
+          name: mongodb-cluster-ssh-dev
           clobber: True
        credentials:
            - reference: aws_2
              orchestration: true
-   vpc:
-       stack_name: elasticdev:::aws_vpc_and_security_group
-       arguments:
-          main_network_block: 10.43.0.0/16
-          tier_level: "3"
-          enable_nat_gateway: true
-          single_nat_gateway: true
-          enable_dns_hostnames: true
-          reuse_nat_ips: true
-          one_nat_gateway_per_az: false
-          use_docker: True
-          labels: "db_type:kafka"
-          tags: "kafka,database"
-       credentials:
-           - reference: aws_2
-             orchestration: true
-   kafka:
-       stack_name: elasticdev:::kafka_on_ec2
+   replica:
+       stack_name: elasticdev:::mongodb_replica_on_ec2
        dependencies:
-          - infrastructure::vpc
           - infrastructure::ssh_upload
        arguments:
-          image: ami-03aad423811bbee56
-          bastion_image: ami-03aad423811bbee56
+          vpc_name: selector:::vpc_info::name
+          subnet_ids: selector:::private_subnet_info::subnet_id:csv
+          sg_id: selector:::sg_database_info::sg_id
+          vpc_id: selector:::vpc_info::vpc_id
+          bastion_sg_id: selector:::sg_bastion_info::sg_id
+          bastion_subnet_ids: selector:::public_subnet_info::subnet_id:csv
           bastion_config_destroy: true
-          bastion_security_groups: bastion
-          bastion_subnet: public
+          mongodb_cluster: mongodb-cluster-dev
           hostname_random: true
           size: t3.micro
-          ssh_keyname: kafka-cluster-ssh-dev
-          num_of_replicas: 5
-          security_groups: database
-          subnet: private
+          ssh_keyname: mongodb-cluster-ssh-dev
+          num_of_replicas: 3
           disksize: 25
+          ip_key: public_ip
+          volume_size: 25
+          volume_mount: /var/lib/mongodb
+          volume_fstype: xfs
+          mongodb_username: admin123
+          mongodb_password: admin123
+       selectors:
+         - vpc_info
+         - public_subnet_info
+         - private_subnet_info
+         - sg_bastion_info
+         - sg_database_info
        credentials:
            - reference: aws_2
              orchestration: true
+
 ```
