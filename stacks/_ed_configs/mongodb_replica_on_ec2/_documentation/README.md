@@ -179,5 +179,4 @@ infrastructure:
        credentials:
            - reference: aws_2
              orchestration: true
-
 ```
