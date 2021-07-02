@@ -58,8 +58,6 @@ infrastructure:
           volume_size: 25
           volume_mount: /var/lib/mongodb
           volume_fstype: xfs
-          mongodb_username: admin123
-          mongodb_password: admin123
 ```
 
 **Sample launch elasticdev/elasticdev.yml (with labels and selectors)**
