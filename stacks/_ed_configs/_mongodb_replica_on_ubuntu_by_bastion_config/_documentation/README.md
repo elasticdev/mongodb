@@ -15,7 +15,6 @@
 | mongodb_cluster   | the name of the mongodb cluster       | string   | None         |
 | ssh_keyname   | the name the ssh_keyname to use for the VMs       | string   | None         |
 | aws_default_region   | aws region to create the ecr repo                | string   | us-east-1         |
-
 | num_of_replicas   | the number of replicas in the mongodb cluster       | string   | 1         |
 | bastion_sg_id   | the security group id used for the bastion config host      | string   | bastion         |
 | bastion_subnet_ids   | the subnet id(s) in CSV used for the bastion config host      | string   | private         |
